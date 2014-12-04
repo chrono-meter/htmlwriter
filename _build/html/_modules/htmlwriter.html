@@ -1,0 +1,1439 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>htmlwriter &mdash; htmlwriter 1.0.0 documentation</title>
+  
+
+  
+  
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="top" title="htmlwriter 1.0.0 documentation" href="../index.html"/>
+        <link rel="up" title="Module code" href="index.html"/> 
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        <a href="../index.html" class="fa fa-home"> htmlwriter</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+        
+            <ul>
+<li class="toctree-l1"><a class="reference internal" href="../htmlwriter.html">module &#8216;htmlwriter&#8217;</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../htmlwriter.html#htmlwriter-html-with-python-codes">htmlwriter - HTML with Python codes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../htmlwriter.html#xmlwriter">XMLWriter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../htmlwriter.html#htmlwriter">HTMLWriter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../htmlwriter.html#xhtmlwriter">XHTMLWriter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../htmlwriter.html#html5writer">HTML5Writer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../htmlwriter.html#bootstrap3writer">Bootstrap3Writer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../htmlwriter.html#constants">Constants</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../extend.html">Custom writer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../extend.html#template">Template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../extend.html#tagmethodhelper">TagMethodHelper</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../extend.html#renaming-and-merging-attribute">Renaming and merging attribute</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../extend.html#internal">Internal</a></li>
+</ul>
+</li>
+</ul>
+
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">htmlwriter</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="index.html">Module code</a> &raquo;</li>
+      
+    <li>htmlwriter</li>
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            
+  <h1>Source code for htmlwriter</h1><div class="highlight"><pre>
+<span class="c">#!/usr/local/bin/python3.4</span>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;\</span>
+<span class="sd">htmlwriter - HTML with Python codes</span>
+<span class="sd">===================================</span>
+
+<span class="sd">This module is similar to `html &lt;https://pypi.python.org/pypi/html&gt;`_, but this provides:</span>
+<span class="sd">    * support `with statement &lt;https://docs.python.org/3/reference/compound_stmts.html#with&gt;`_</span>
+<span class="sd">    * support shorthand (Bootstrap is supported)</span>
+<span class="sd">    * simple and consistent API</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">import</span> <span class="nn">keyword</span>
+<span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">StringIO</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">fnmatch</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">commonprefix</span>
+<span class="kn">import</span> <span class="nn">textwrap</span>
+<span class="kn">import</span> <span class="nn">contextlib</span>
+<span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="c"># from lxml import etree  # lxml doesn&#39;t support customizing entity handler</span>
+<span class="kn">from</span> <span class="nn">xml.etree</span> <span class="kn">import</span> <span class="n">ElementTree</span> <span class="k">as</span> <span class="n">etree</span>
+<span class="kn">import</span> <span class="nn">xml.sax.saxutils</span>  <span class="c"># or html.escape</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">unittest</span>
+
+
+<span class="n">__version__</span> <span class="o">=</span> <span class="s">&#39;1.0.0&#39;</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="n">__author_email__</span> <span class="o">=</span> <span class="s">&#39;chrono-meter@gmx.net&#39;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="s">&#39;PSF&#39;</span>
+<span class="n">__url__</span> <span class="o">=</span> <span class="s">&#39;http://pypi.python.org/pypi/?&#39;</span>
+<span class="c"># http://pypi.python.org/pypi?%3Aaction=list_classifiers</span>
+<span class="n">__classifiers__</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="s">&#39;&#39;&#39;</span><span class="se">\</span>
+<span class="s">    Development Status :: 4 - Beta</span>
+<span class="s">    Environment :: Web Environment</span>
+<span class="s">    Intended Audience :: Developers</span>
+<span class="s">    License :: OSI Approved :: Python Software Foundation License</span>
+<span class="s">    Operating System :: OS Independent</span>
+<span class="s">    Programming Language :: Python :: 3.4</span>
+<span class="s">    Topic :: Internet :: WWW/HTTP</span>
+<span class="s">    Topic :: Software Development :: Libraries :: Python Modules</span>
+<span class="s">    Topic :: Text Processing :: Markup</span>
+<span class="s">    Topic :: Text Processing :: Markup :: HTML</span>
+<span class="s">    Topic :: Text Processing :: Markup :: XML</span>
+<span class="s">    &#39;&#39;&#39;</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">()</span>
+<span class="c">#: HTML 4.01 strict doctype</span>
+<span class="n">html_4_01_strict</span> <span class="o">=</span> <span class="s">&#39;&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.01//EN&quot; &quot;http://www.w3.org/TR/html4/strict.dtd&quot;&gt;&#39;</span>
+<span class="c">#: HTML 4.01 transitional doctype</span>
+<span class="n">html_4_01_transitional</span> <span class="o">=</span> \
+    <span class="s">&#39;&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.01 Transitional//EN&quot; &quot;http://www.w3.org/TR/html4/loose.dtd&quot;&gt;&#39;</span>
+<span class="c">#: HTML 4.01 frameset doctype</span>
+<span class="n">html_4_01_frameset</span> <span class="o">=</span> \
+    <span class="s">&#39;&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.01 Frameset//EN&quot; &quot;http://www.w3.org/TR/html4/frameset.dtd&quot;&gt;&#39;</span>
+<span class="c">#: XHTML 1.0 doctype</span>
+<span class="n">xhtml_1_0_strict</span> <span class="o">=</span> \
+    <span class="s">&#39;&lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD XHTML 1.0 Strict//EN&quot; &quot;http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd&quot;&gt;&#39;</span>
+<span class="c">#: XHTML 1.0 transitional doctype</span>
+<span class="n">xhtml_1_0_transitional</span> <span class="o">=</span> <span class="s">&#39;&lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD XHTML 1.0 Transitional//EN&quot;&#39;</span> \
+                         <span class="s">&#39; &quot;http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd&quot;&gt;&#39;</span>
+<span class="c">#: XHTML 1.0 frameset doctype</span>
+<span class="n">xhtml_1_0_frameset</span> <span class="o">=</span> <span class="s">&#39;&lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD XHTML 1.0 Frameset//EN&quot;&#39;</span> \
+                     <span class="s">&#39; &quot;http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd&quot;&gt;&#39;</span>
+<span class="c">#: XHTML 1.1 doctype</span>
+<span class="n">xhtml_1_1</span> <span class="o">=</span> <span class="s">&#39;&lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD XHTML 1.1//EN&quot; &quot;http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd&quot;&gt;&#39;</span>
+
+
+<span class="k">def</span> <span class="nf">parse_xml</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">&#39;&amp;([A-Za-z0-9]+);&#39;</span><span class="p">,</span> <span class="s">&#39;&amp;amp;</span><span class="se">\\</span><span class="s">1;&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+
+    <span class="c"># In Python 3, it&#39;s unable to override `xml.etree.ElementTree.XMLParser` expat handler.</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">XMLParser</span><span class="p">()</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">entity</span><span class="p">[</span><span class="s">&#39;amp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;&amp;&#39;</span>
+    <span class="c"># parser.entity.update(html.entities.html5)</span>
+
+    <span class="n">parser</span><span class="o">.</span><span class="n">feed</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">parser</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="TagMethodHelper"><a class="viewcode-back" href="../extend.html#htmlwriter.TagMethodHelper">[docs]</a><span class="k">class</span> <span class="nc">TagMethodHelper</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Method wrapper for some features:</span>
+
+<span class="sd">        * Register and cleanup :attr:`~htmlwriter.XMLWriter._pending`.</span>
+<span class="sd">        * `Conetxt manager` without function calling.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param function method: original function</span>
+<span class="sd">        :param args: bound positional arguments</span>
+<span class="sd">        :param kwargs: bound keyword arguments</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="n">method</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="n">args</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">context_manager</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">functools</span><span class="o">.</span><span class="n">update_wrapper</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">decorator</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">helper</span><span class="p">(</span><span class="n">method</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">cls</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">helper</span>
+
+    <span class="k">def</span> <span class="nf">__get__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">method</span><span class="o">.</span><span class="n">__get__</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">type</span><span class="p">),</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">__name__</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__name__</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">__doc__</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__doc__</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">method</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">method</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">method</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">method</span>  <span class="c"># get bound method</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span> <span class="o">+</span> <span class="n">args</span>
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span> <span class="o">=</span> <span class="n">method</span><span class="o">.</span><span class="n">__self__</span>
+
+        <span class="nd">@contextlib.contextmanager</span>
+        <span class="k">def</span> <span class="nf">helper</span><span class="p">():</span>
+            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pending</span> <span class="ow">is</span> <span class="n">pending</span><span class="p">,</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_pending</span><span class="p">,</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pending</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="k">with</span> <span class="n">method</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="k">as</span> <span class="n">result</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="n">result</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">)</span>  <span class="c"># consume self._pending</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pending</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">,</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_pending</span><span class="p">,</span> <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pending</span> <span class="o">=</span> <span class="n">pending</span> <span class="o">=</span> <span class="n">helper</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">pending</span>
+
+    <span class="k">def</span> <span class="nf">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">context_manager</span> <span class="ow">is</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">context_manager</span> <span class="o">=</span> <span class="n">contextlib</span><span class="o">.</span><span class="n">ExitStack</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">context_manager</span><span class="o">.</span><span class="n">enter_context</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">method</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="k">del</span> <span class="n">args</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">context_manager</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">context_manager</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">context_manager</span> <span class="o">=</span> <span class="bp">None</span>
+
+</div>
+<div class="viewcode-block" id="PreProcessor"><a class="viewcode-back" href="../extend.html#htmlwriter.PreProcessor">[docs]</a><span class="k">class</span> <span class="nc">PreProcessor</span><span class="p">(</span><span class="nb">type</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Metaclass for process :attr:`~htmlwriter.XMLWriter._template`.</span>
+
+<span class="sd">    This is a metaclass of :class:`~htmlwriter.XMLWriter`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__new__</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">classdict</span><span class="p">):</span>
+        <span class="n">klass</span> <span class="o">=</span> <span class="nb">type</span><span class="o">.</span><span class="n">__new__</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">classdict</span><span class="p">))</span>
+        <span class="n">cls</span><span class="o">.</span><span class="n">compile_template</span><span class="p">(</span><span class="n">klass</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">klass</span>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="PreProcessor.compile_template"><a class="viewcode-back" href="../extend.html#htmlwriter.PreProcessor.compile_template">[docs]</a>    <span class="k">def</span> <span class="nf">compile_template</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">writer_class</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Generate methods from string.</span>
+
+<span class="sd">        :param XMLWriter writer_class: target class</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">doc</span> <span class="o">=</span> <span class="n">parse_xml</span><span class="p">(</span><span class="n">writer_class</span><span class="o">.</span><span class="n">_template</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">doc</span><span class="p">:</span>
+            <span class="n">e</span><span class="o">.</span><span class="n">tail</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+
+            <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="n">etree</span><span class="o">.</span><span class="n">Comment</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="n">name</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">get_name</span><span class="p">(</span><span class="n">doc</span><span class="o">.</span><span class="n">attrib</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;prefix&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">),</span> <span class="n">e</span><span class="p">)</span>
+            <span class="c"># if hasattr(writer_class, name):</span>
+            <span class="c">#     warnings.warn(&#39;%s conflict: %s&#39; % (name, etree.tostring(e, encoding=&#39;unicode&#39;)))</span>
+            <span class="c">#     continue</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
+                <span class="n">method</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">make_from_deep</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">method</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">make_from_shallow</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+            <span class="n">method</span> <span class="o">=</span> <span class="n">TagMethodHelper</span><span class="p">(</span><span class="n">method</span><span class="p">)</span>
+            <span class="n">method</span><span class="o">.</span><span class="n">__name__</span> <span class="o">=</span> <span class="n">name</span>
+            <span class="n">method</span><span class="o">.</span><span class="n">_signature</span> <span class="o">=</span> <span class="s">&#39;[text: str, ]**attributes&#39;</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="n">writer_class</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">method</span><span class="p">)</span>
+</div>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="PreProcessor.get_name"><a class="viewcode-back" href="../extend.html#htmlwriter.PreProcessor.get_name">[docs]</a>    <span class="k">def</span> <span class="nf">get_name</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span> <span class="n">etree</span><span class="o">.</span><span class="n">Element</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Generate method name from element.</span>
+
+<span class="sd">        :param str prefix: method name prefix</span>
+<span class="sd">        :param Element e: source element</span>
+<span class="sd">        :return: method name</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">common_class_name</span> <span class="o">=</span> <span class="n">commonprefix</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">attrib</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;class&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
+
+        <span class="k">if</span> <span class="s">&#39;id&#39;</span> <span class="ow">in</span> <span class="n">e</span><span class="o">.</span><span class="n">attrib</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">attrib</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;id&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">common_class_name</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">common_class_name</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">tag</span>
+
+        <span class="n">name</span> <span class="o">=</span> <span class="n">prefix</span> <span class="o">+</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\\</span><span class="s">W+&#39;</span><span class="p">,</span> <span class="s">&#39;_&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
+
+        <span class="k">if</span> <span class="n">keyword</span><span class="o">.</span><span class="n">iskeyword</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&#39;renamed </span><span class="si">%s</span><span class="s"> -&gt; </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">name</span> <span class="o">+</span> <span class="s">&#39;_&#39;</span><span class="p">))</span>
+            <span class="n">name</span> <span class="o">+=</span> <span class="s">&#39;_&#39;</span>
+
+        <span class="k">return</span> <span class="n">name</span>
+</div>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="PreProcessor.make_from_shallow"><a class="viewcode-back" href="../extend.html#htmlwriter.PreProcessor.make_from_shallow">[docs]</a>    <span class="k">def</span> <span class="nf">make_from_shallow</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span> <span class="n">etree</span><span class="o">.</span><span class="n">Element</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Generate method from element.</span>
+
+<span class="sd">        :param Element e: source element</span>
+<span class="sd">        :return: not bound method</span>
+<span class="sd">        :rtype: function</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">tag</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">tag</span>
+        <span class="n">default_attributes</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">attrib</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">default_content</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">text</span>
+
+        <span class="k">def</span> <span class="nf">result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">attributes</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">args</span><span class="p">:</span>
+                <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">default_content</span><span class="p">,</span> <span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tag</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_merge_attributes</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">default_attributes</span><span class="p">,</span> <span class="n">attributes</span><span class="p">))</span>
+
+        <span class="n">result</span><span class="o">.</span><span class="n">__doc__</span> <span class="o">=</span> <span class="s">&#39;Write or enter &quot;</span><span class="si">%s</span><span class="s">&quot;.</span><span class="se">\n</span><span class="s">See :func:`~XMLWriter.tag`.&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">etree</span><span class="o">.</span><span class="n">tostring</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s">&#39;unicode&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;&amp;amp;&#39;</span><span class="p">,</span> <span class="s">&#39;&amp;&#39;</span><span class="p">),</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span>
+</div>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="PreProcessor.make_from_deep"><a class="viewcode-back" href="../extend.html#htmlwriter.PreProcessor.make_from_deep">[docs]</a>    <span class="k">def</span> <span class="nf">make_from_deep</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">root</span><span class="p">:</span> <span class="n">etree</span><span class="o">.</span><span class="n">Element</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Generate method from element.</span>
+
+<span class="sd">        :param Element e: source element</span>
+<span class="sd">        :return: not bound method</span>
+<span class="sd">        :rtype: function</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">prefix</span> <span class="o">=</span> <span class="s">&#39;template-&#39;</span>
+
+        <span class="k">def</span> <span class="nf">result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">attributes</span><span class="p">):</span>
+            <span class="n">pause</span> <span class="o">=</span> <span class="nb">object</span><span class="p">()</span>
+
+            <span class="nd">@contextlib.contextmanager</span>
+            <span class="k">def</span> <span class="nf">walk</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="n">prefix</span> <span class="o">+</span> <span class="s">&#39;content&#39;</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">args</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">text</span> <span class="ow">or</span> <span class="s">&#39;&#39;</span><span class="p">)</span>
+                    <span class="k">yield</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">tail</span><span class="p">)</span>
+                    <span class="k">return</span>
+
+                <span class="k">elif</span> <span class="n">node</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="n">prefix</span> <span class="o">+</span> <span class="s">&#39;yield&#39;</span><span class="p">:</span>
+                    <span class="k">yield</span> <span class="n">pause</span>
+                    <span class="k">return</span>
+
+                <span class="k">elif</span> <span class="n">node</span><span class="o">.</span><span class="n">tag</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">prefix</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                        <span class="s">&#39;not supported element: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">etree</span><span class="o">.</span><span class="n">tostring</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s">&#39;unicode&#39;</span><span class="p">),</span> <span class="p">))</span>
+
+                <span class="n">imported_attributes</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="n">handlable_attributes</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">attrib</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">prefix</span><span class="p">):</span>
+                        <span class="n">imported_attributes</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">prefix</span><span class="p">):]</span>
+                        <span class="n">handlable_attributes</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+                <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">handlable_attributes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">handler</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="s">&#39;handle_&#39;</span> <span class="o">+</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\\</span><span class="s">W+&#39;</span><span class="p">,</span> <span class="s">&#39;_&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
+                    <span class="n">imported_attributes</span> <span class="o">=</span> \
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_merge_attributes</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">tag</span><span class="p">,</span> <span class="n">imported_attributes</span><span class="p">,</span> <span class="n">handler</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">attributes</span><span class="p">))</span>
+
+                <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">tag</span><span class="p">,</span> <span class="o">**</span><span class="n">imported_attributes</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">text</span> <span class="ow">or</span> <span class="s">&#39;&#39;</span><span class="p">)</span>
+
+                    <span class="n">yielded</span> <span class="o">=</span> <span class="bp">False</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">node</span><span class="p">:</span>
+                        <span class="k">with</span> <span class="n">walk</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">as</span> <span class="n">_</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">_</span> <span class="ow">is</span> <span class="n">pause</span><span class="p">:</span>
+                                <span class="k">assert</span> <span class="ow">not</span> <span class="n">yielded</span>
+                                <span class="n">yielded</span> <span class="o">=</span> <span class="bp">True</span>
+                                <span class="k">yield</span> <span class="n">pause</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">yielded</span><span class="p">:</span>
+                        <span class="k">yield</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">tail</span> <span class="ow">or</span> <span class="s">&#39;&#39;</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">walk</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+
+        <span class="n">tmpl</span> <span class="o">=</span> <span class="n">textwrap</span><span class="o">.</span><span class="n">indent</span><span class="p">(</span><span class="n">textwrap</span><span class="o">.</span><span class="n">dedent</span><span class="p">(</span><span class="n">etree</span><span class="o">.</span><span class="n">tostring</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s">&#39;unicode&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;&amp;amp;&#39;</span><span class="p">,</span> <span class="s">&#39;&amp;&#39;</span><span class="p">)),</span> <span class="s">&#39;    &#39;</span><span class="p">)</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">__doc__</span> <span class="o">=</span> <span class="s">&#39;Write or enter template:</span><span class="se">\n\n</span><span class="s">.. code-block:: xml</span><span class="se">\n\n</span><span class="s">&#39;</span> <span class="o">+</span> <span class="n">tmpl</span>
+        <span class="c"># result.__doc__ = etree.tostring(root, encoding=&#39;unicode&#39;).replace(&#39;&amp;amp;&#39;, &#39;&amp;&#39;)</span>
+        <span class="k">return</span> <span class="n">result</span>
+</div>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="PreProcessor.handle_attributes"><a class="viewcode-back" href="../extend.html#htmlwriter.PreProcessor.handle_attributes">[docs]</a>    <span class="k">def</span> <span class="nf">handle_attributes</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">patterns</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">input_attributes</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Handle `template-attributes`.</span>
+
+<span class="sd">        Pattern is glob style and `-` prefix means exclude pattern.</span>
+
+<span class="sd">        :param str patterns: handling attribute value</span>
+<span class="sd">        :param dict input_attributes: source attributes</span>
+<span class="sd">        :return: filtered attributes</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">includes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">excludes</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">patterns</span> <span class="o">=</span> <span class="n">patterns</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;,&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="s">&#39;,&#39;</span> <span class="ow">in</span> <span class="n">patterns</span> <span class="k">else</span> <span class="n">patterns</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">pattern</span> <span class="ow">in</span> <span class="n">patterns</span><span class="p">:</span>
+            <span class="n">pattern</span> <span class="o">=</span> <span class="n">pattern</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">pattern</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;-&#39;</span><span class="p">):</span>
+                <span class="n">includes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fnmatch</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">pattern</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">excludes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fnmatch</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">pattern</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span>
+
+        <span class="n">includes</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&#39;^(&#39;</span> <span class="o">+</span> <span class="s">&#39;|&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">includes</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;)$&#39;</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+        <span class="n">excludes</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&#39;^(&#39;</span> <span class="o">+</span> <span class="s">&#39;|&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">excludes</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;)$&#39;</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">input_attributes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">excludes</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+                <span class="k">continue</span>
+            <span class="k">elif</span> <span class="n">includes</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+                <span class="n">result</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="k">return</span> <span class="n">result</span>
+</div>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="PreProcessor.handle_attribute_map_class"><a class="viewcode-back" href="../extend.html#htmlwriter.PreProcessor.handle_attribute_map_class">[docs]</a>    <span class="k">def</span> <span class="nf">handle_attribute_map_class</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">patterns</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">input_attributes</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Handle `template-attribute-map-class`.</span>
+
+<span class="sd">        :param str patterns: handling attribute value (ex. &#39;active, disabled as btn-disabled&#39;)</span>
+<span class="sd">        :param dict input_attributes: source attributes</span>
+<span class="sd">        :return: filtered attributes</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">classes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">patterns</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;,&#39;</span><span class="p">):</span>
+            <span class="n">match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s">&#39;(</span><span class="se">\\</span><span class="s">S+)</span><span class="se">\\</span><span class="s">s+as</span><span class="se">\\</span><span class="s">s+(</span><span class="se">\\</span><span class="s">S+)&#39;</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
+                <span class="n">name</span><span class="p">,</span> <span class="n">alias</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">groups</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="n">alias</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">input_attributes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+                <span class="n">classes</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">alias</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="s">&#39;class&#39;</span><span class="p">:</span> <span class="s">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">classes</span><span class="p">)}</span> <span class="k">if</span> <span class="n">classes</span> <span class="k">else</span> <span class="p">{}</span>
+
+</div></div>
+<div class="viewcode-block" id="XMLWriter"><a class="viewcode-back" href="../htmlwriter.html#htmlwriter.XMLWriter">[docs]</a><span class="k">class</span> <span class="nc">XMLWriter</span><span class="p">(</span><span class="n">StringIO</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">PreProcessor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;\</span>
+<span class="sd">    Base writer class. This provides useful functions for writing XML content.</span>
+
+<span class="sd">    Simplest usage:</span>
+<span class="sd">        &gt;&gt;&gt; writer = XMLWriter(&#39;html&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; with writer.tag(&#39;body&#39;):</span>
+<span class="sd">        ...     writer.tag(&#39;p&#39;, &#39;hello, world&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; writer.getvalue()</span>
+<span class="sd">        &#39;&lt;html&gt;&lt;body&gt;&lt;p&gt;hello, world&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;&#39;</span>
+
+<span class="sd">    Note that :meth:`~tag` returns</span>
+<span class="sd">    `context manager &lt;https://docs.python.org/3/library/stdtypes.html#context-manager-types&gt;`_.</span>
+<span class="sd">    So you can use `with statement &lt;https://docs.python.org/3/reference/compound_stmts.html#with&gt;`_ with it.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_signature</span> <span class="o">=</span> <span class="s">&#39;[doctype: str, ]root_tag: str, **root_attributes&#39;</span>
+    <span class="c">#: XML declaration string or `None`. This will be written before content on :meth:`~getvalue`.</span>
+    <span class="n">declaration</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="c">#: XML doctype string or `None`. This will be written before content on :meth:`~getvalue`.</span>
+    <span class="n">doctype</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="c">#: root tag name</span>
+    <span class="n">root_tag</span> <span class="o">=</span> <span class="s">&#39;xml&#39;</span>
+    <span class="c">#: root tag attributes</span>
+    <span class="n">root_attributes</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c">#: Generate method from string quickly.</span>
+    <span class="c">#: See source of :class:`~htmlwriter.PreProcessor` for implementation.</span>
+    <span class="n">_template</span> <span class="o">=</span> <span class="s">&#39;&lt;template&gt;&lt;/template&gt;&#39;</span>
+    <span class="c">#: Set of tag name that does not require end tag.</span>
+    <span class="c">#: See source of :meth:`~htmlwriter.XMLWriter._tag` for implementation.</span>
+    <span class="n">_no_end_tags</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="c">#: Set of tag name that must have end tag.</span>
+    <span class="c">#: See source of :meth:`~htmlwriter.XMLWriter._tag` for implementation.</span>
+    <span class="n">_require_end_tags</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="c">#: Tuple of boolean attribute (attribute without value. ex &lt;input disabled/&gt;).</span>
+    <span class="c">#: Item may be `(None, &#39;attribute_name&#39;)` or `(&#39;tag_name&#39;, &#39;attribute_name&#39;)`.</span>
+    <span class="n">_boolean_attributes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="c">#: Tuple of attribute renaming pattern.</span>
+    <span class="c">#: Item may be `(pattern, repl)` (1st and 2nd argument for `re.sub`).</span>
+    <span class="c">#: See source of :meth:`~htmlwriter.XMLWriter._merge_attributes` for implementation.</span>
+    <span class="n">_attribute_rename_patterns</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span><span class="s">&#39;^(xml|xmlns)_(.+)&#39;</span><span class="p">,</span> <span class="s">&#39;</span><span class="se">\\</span><span class="s">1:</span><span class="se">\\</span><span class="s">2&#39;</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="c">#: See source of :meth:`~htmlwriter.XMLWriter._merge_attributes` for implementation.</span>
+    <span class="n">_merge_attribute_handlers</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="c"># (None, &#39;attribute_name&#39;): handler(old_value, new_value),</span>
+        <span class="c"># (&#39;tag_name&#39;, &#39;attribute_name&#39;): handler(old_value, new_value),</span>
+    <span class="p">}</span>
+    <span class="c">#: Pending writing state as `context manager`. This must be not executed, execute in next</span>
+    <span class="c">#: :meth:`~htmlwriter.XMLWriter.write`.</span>
+    <span class="n">_pending</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">root_attributes</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param doctype: XML doctype</span>
+<span class="sd">        :type doctype: str or None</span>
+<span class="sd">        :param str root_tag: root tag name</span>
+<span class="sd">        :param root_attributes: root tag attributes</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&#39;no root tag&#39;</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">,</span> <span class="s">&#39;too many arguments&#39;</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">root_tag</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;&lt;!DOCTYPE &#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;&gt;&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">doctype</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">root_tag</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">root_attributes</span> <span class="o">=</span> <span class="n">root_attributes</span>
+
+<div class="viewcode-block" id="XMLWriter.getvalue"><a class="viewcode-back" href="../htmlwriter.html#htmlwriter.XMLWriter.getvalue">[docs]</a>    <span class="k">def</span> <span class="nf">getvalue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">declaration</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doctype</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">root_tag</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Get the written string.</span>
+
+<span class="sd">        :param declaration: XML declaration output flag or XML declaration</span>
+<span class="sd">        :type declaration: bool or str</span>
+<span class="sd">        :param doctype: XML doctype output flag or XML doctype</span>
+<span class="sd">        :type doctype: bool or str</span>
+<span class="sd">        :param bool root_tag: root tag output flag</span>
+<span class="sd">        :return: XML string</span>
+<span class="sd">        :rtype: str</span>
+
+<span class="sd">        See :meth:`io.StringIO.getvalue`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">)</span>  <span class="c"># consume self._pending</span>
+
+        <span class="n">header</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+
+        <span class="k">if</span> <span class="n">declaration</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">declaration</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">header</span> <span class="o">+=</span> <span class="n">declaration</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">declaration</span><span class="p">:</span>
+                <span class="n">header</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">declaration</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span>
+
+        <span class="k">if</span> <span class="n">doctype</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">doctype</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">header</span> <span class="o">+=</span> <span class="n">doctype</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">doctype</span><span class="p">:</span>
+                <span class="n">header</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">doctype</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span>
+
+        <span class="n">content</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">getvalue</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">root_tag</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&#39;</span><span class="si">%s%s%s</span><span class="s">&lt;/</span><span class="si">%s</span><span class="s">&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">header</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_get_begin_tag</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root_tag</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">root_attributes</span><span class="p">),</span>
+                <span class="n">content</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">root_tag</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">content</span>
+</div>
+<div class="viewcode-block" id="XMLWriter.write"><a class="viewcode-back" href="../htmlwriter.html#htmlwriter.XMLWriter.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Write text with no escaping.</span>
+
+<span class="sd">        See :meth:`io.StringIO.getvalue`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># execute pending `context manager`</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pending</span><span class="p">:</span>
+            <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pending</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="c"># NOTE: required explicit clearing at top of `context manager` (`self._pending = None`)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="XMLWriter._merge_attributes"><a class="viewcode-back" href="../extend.html#htmlwriter.XMLWriter._merge_attributes">[docs]</a>    <span class="k">def</span> <span class="nf">_merge_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Merge and rename attributes.</span>
+
+<span class="sd">        :param str tag: tag name string</span>
+<span class="sd">        :param args: tuple of attributes, later is prior</span>
+<span class="sd">        :type args: tuple(dict)</span>
+<span class="sd">        :return: new merged attributes `dict`</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">attributes</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attributes</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">Mapping</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">attributes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="c"># do renaming</span>
+                <span class="k">for</span> <span class="n">pattern</span><span class="p">,</span> <span class="n">repl</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_attribute_rename_patterns</span><span class="p">:</span>
+                    <span class="n">name</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">repl</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+                    <span class="c"># call merge handler</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_merge_attribute_handlers</span><span class="p">:</span>
+                        <span class="n">result</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_merge_attribute_handlers</span><span class="p">[</span><span class="n">tag</span><span class="p">,</span> <span class="n">name</span><span class="p">](</span><span class="n">result</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="n">value</span><span class="p">)</span>
+                    <span class="k">elif</span> <span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_merge_attribute_handlers</span><span class="p">:</span>
+                        <span class="n">result</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_merge_attribute_handlers</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="p">](</span><span class="n">result</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="n">value</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">result</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">result</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="k">return</span> <span class="n">result</span>
+</div>
+<div class="viewcode-block" id="XMLWriter._get_begin_tag"><a class="viewcode-back" href="../extend.html#htmlwriter.XMLWriter._get_begin_tag">[docs]</a>    <span class="k">def</span> <span class="nf">_get_begin_tag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">attributes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Get a string of begin tag.</span>
+
+<span class="sd">        :param str tag: tag name</span>
+<span class="sd">        :param attributes: tag attributes</span>
+<span class="sd">        :return: &#39;&lt;tag ...&gt;&#39; or &#39;&lt;tag&gt;&#39; if attributes are empty</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+
+        <span class="n">attributes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_merge_attributes</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">attributes</span><span class="p">)</span>  <span class="c"># do renaming and merging</span>
+
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">attributes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stringify_attribute</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">s</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">+=</span> <span class="s">&#39; &#39;</span> <span class="o">+</span> <span class="n">s</span>
+
+        <span class="k">return</span> <span class="s">&#39;&lt;&#39;</span> <span class="o">+</span> <span class="n">tag</span> <span class="o">+</span> <span class="n">result</span> <span class="o">+</span> <span class="s">&#39;&gt;&#39;</span>
+</div>
+<div class="viewcode-block" id="XMLWriter._stringify_attribute"><a class="viewcode-back" href="../extend.html#htmlwriter.XMLWriter._stringify_attribute">[docs]</a>    <span class="k">def</span> <span class="nf">_stringify_attribute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Get a string of attribute.</span>
+
+<span class="sd">        :param str tag: tag name</span>
+<span class="sd">        :param str name: attribute name</span>
+<span class="sd">        :param value: attribute value</span>
+<span class="sd">        :return: representation string for embedding begin tag</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_boolean_attributes</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_boolean_attributes</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">name</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="k">pass</span>
+
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&#39;not supported </span><span class="si">%r</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">))</span>
+
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="s">&#39;true&#39;</span> <span class="k">if</span> <span class="n">value</span> <span class="k">else</span> <span class="s">&#39;false&#39;</span>
+
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">Mapping</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">)</span>  <span class="c"># TODO: dict attribute</span>
+
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">Iterable</span><span class="p">):</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="s">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">=</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">xml</span><span class="o">.</span><span class="n">sax</span><span class="o">.</span><span class="n">saxutils</span><span class="o">.</span><span class="n">quoteattr</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="s">&#39;&#39;</span>
+</div>
+<div class="viewcode-block" id="XMLWriter._tag"><a class="viewcode-back" href="../extend.html#htmlwriter.XMLWriter._tag">[docs]</a>    <span class="k">def</span> <span class="nf">_tag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">attributes</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Non wrapped version of :meth:`~htmlwriter.XMLWriter.tag`. Don&#39;t call this function directly. This function</span>
+<span class="sd">        doesn&#39;t register and cleanup :attr:`~htmlwriter.XMLWriter._pending`.</span>
+
+<span class="sd">        :param str tag: tag name</span>
+<span class="sd">        :param str text: text content, this will be written by :meth:`~htmlwriter.XMLWriter.text`</span>
+<span class="sd">        :param attributes: attributes</span>
+<span class="sd">        :return: `context manager &lt;https://docs.python.org/3/library/stdtypes.html#context-manager-types&gt;`_</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&#39;no tag&#39;</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">2</span><span class="p">,</span> <span class="s">&#39;too many arguments&#39;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">tag</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">content</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">tag</span><span class="p">,</span> <span class="n">content</span> <span class="o">=</span> <span class="n">args</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">tag</span><span class="p">,</span> <span class="s">&#39;not expected: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="p">)</span>
+
+        <span class="nd">@contextlib.contextmanager</span>
+        <span class="k">def</span> <span class="nf">helper</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_begin_tag</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="o">**</span><span class="n">attributes</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">content</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>  <span class="c"># NOTE: Use .write() for content without escaping</span>
+
+            <span class="n">wrote</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
+
+            <span class="k">yield</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">content</span> <span class="ow">and</span> <span class="n">wrote</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pending</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">tag</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_require_end_tags</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;&lt;/</span><span class="si">%s</span><span class="s">&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="p">))</span>
+                <span class="k">elif</span> <span class="n">tag</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_no_end_tags</span><span class="p">:</span>
+                    <span class="k">pass</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;/&gt;&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="n">tag</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_no_end_tags</span><span class="p">,</span> <span class="s">&#39;&quot;</span><span class="si">%s</span><span class="s">&quot; tag cannot contain content&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;&lt;/</span><span class="si">%s</span><span class="s">&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">helper</span><span class="p">()</span>
+</div>
+    <span class="n">tag</span> <span class="o">=</span> <span class="n">TagMethodHelper</span><span class="p">(</span><span class="n">_tag</span><span class="p">)</span>
+    <span class="n">tag</span><span class="o">.</span><span class="n">__doc__</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;Write or enter a tag.</span>
+
+<span class="s">        :param str tag: tag name</span>
+<span class="s">        :param str text: text content, this will be written by :func:`~htmlwriter.XMLWriter.text`</span>
+<span class="s">        :param attributes: attributes</span>
+<span class="s">        :return: `context manager &lt;https://docs.python.org/3/library/stdtypes.html#context-manager-types&gt;`_</span>
+<span class="s">        &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="XMLWriter.text"><a class="viewcode-back" href="../htmlwriter.html#htmlwriter.XMLWriter.text">[docs]</a>    <span class="k">def</span> <span class="nf">text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Write text with escaping &#39;&lt;&#39; and &#39;&gt;&#39;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># self.write(xml.sax.saxutils.escape(s))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;&gt;&quot;</span><span class="p">,</span> <span class="s">&quot;&amp;gt;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;&lt;&quot;</span><span class="p">,</span> <span class="s">&quot;&amp;lt;&quot;</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="XMLWriter.comment"><a class="viewcode-back" href="../htmlwriter.html#htmlwriter.XMLWriter.comment">[docs]</a>    <span class="k">def</span> <span class="nf">comment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Write comment.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="s">&#39;--&gt;&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">s</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;&lt;!--</span><span class="si">%s</span><span class="s">--&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="p">))</span>
+</div>
+<div class="viewcode-block" id="XMLWriter.cdata"><a class="viewcode-back" href="../htmlwriter.html#htmlwriter.XMLWriter.cdata">[docs]</a>    <span class="k">def</span> <span class="nf">cdata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Write cdata.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="s">&#39;]]&gt;&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">s</span>
+        <span class="c"># TODO: see xml.etree.ElementTree._escape_cdata</span>
+        <span class="c">#       .replace(&quot;&amp;&quot;, &quot;&amp;amp;&quot;).replace(&quot;&lt;&quot;, &quot;&amp;lt;&quot;).replace(&quot;&gt;&quot;, &quot;&amp;gt;&quot;)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;&lt;![CDATA[</span><span class="si">%s</span><span class="s">]]&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="p">))</span>
+
+
+<span class="c"># TODO: html pretty printing (like: etree._serialize[&#39;html&#39;] = etree._serialize_html, etree.tostring(*, method=&#39;html&#39;))</span>
+
+</div></div>
+<span class="k">class</span> <span class="nc">XmlTestCase</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">assertXmlEqual</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">first</span><span class="p">,</span> <span class="n">second</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="c"># https://github.com/formencode/formencode/blob/master/formencode/doctest_xml_compare.py</span>
+        <span class="c"># def parse(data):</span>
+        <span class="c">#     class Element(etree.Element):</span>
+        <span class="c">#         doctype = None</span>
+        <span class="c">#</span>
+        <span class="c">#     class TreeBuilder(etree.TreeBuilder):</span>
+        <span class="c">#         doctype = None</span>
+        <span class="c">#</span>
+        <span class="c">#         def doctype(self, name, pubid, system):</span>
+        <span class="c">#             self.doctype = name, pubid, system</span>
+        <span class="c">#</span>
+        <span class="c">#         def close(self):</span>
+        <span class="c">#             result = super().close()</span>
+        <span class="c">#             # result.doctype = self.doctype</span>
+        <span class="c">#             return result</span>
+        <span class="c">#</span>
+        <span class="c">#     parser = etree.XMLParser(target=TreeBuilder(Element))</span>
+        <span class="c">#     parser.entity[&#39;amp&#39;] = &#39;&amp;&#39;</span>
+        <span class="c">#     parser.feed(re.sub(&#39;&amp;([A-Za-z0-9]+);&#39;, &#39;&amp;amp;\\1;&#39;, data))</span>
+        <span class="c">#     return parser.close()</span>
+
+        <span class="k">def</span> <span class="nf">element</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">parse_xml</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">etree</span><span class="o">.</span><span class="n">Element</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">x</span>
+
+        <span class="n">first</span> <span class="o">=</span> <span class="n">element</span><span class="p">(</span><span class="n">first</span><span class="p">)</span>
+        <span class="n">second</span> <span class="o">=</span> <span class="n">element</span><span class="p">(</span><span class="n">second</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">first</span><span class="o">.</span><span class="n">tag</span><span class="p">,</span> <span class="n">second</span><span class="o">.</span><span class="n">tag</span><span class="p">)</span>
+        <span class="c"># self.assertEqual(getattr(first, &#39;doctype&#39;, None), getattr(second, &#39;doctype&#39;, None))</span>
+
+        <span class="k">if</span> <span class="nb">type</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="nb">type</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">&#39;^\{.+\}&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">first</span><span class="o">.</span><span class="n">tag</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
+
+        <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="p">((</span><span class="n">first</span><span class="o">.</span><span class="n">attrib</span><span class="p">,</span> <span class="n">second</span><span class="o">.</span><span class="n">attrib</span><span class="p">),</span> <span class="p">(</span><span class="n">second</span><span class="o">.</span><span class="n">attrib</span><span class="p">,</span> <span class="n">first</span><span class="o">.</span><span class="n">attrib</span><span class="p">)):</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">a</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="s">&#39;html&#39;</span> <span class="ow">and</span> <span class="n">name</span> <span class="o">==</span> <span class="s">&#39;class&#39;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">assertSetEqual</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">split</span><span class="p">()),</span> <span class="nb">set</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">()))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">assertIn</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="n">b</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+        <span class="c"># self.assertSetEqual(set(first.attrib), set(second.attrib))</span>
+        <span class="c"># for name, value in first.attrib.items():</span>
+        <span class="c">#     if type == &#39;html&#39; and name == &#39;class&#39;:</span>
+        <span class="c">#         self.assertSetEqual(set(value.split()), set(second.attrib[name].split()))</span>
+        <span class="c">#     else:</span>
+        <span class="c">#         self.assertEqual(value.strip(), second.attrib[name].strip())</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertMultiLineEqual</span><span class="p">((</span><span class="n">first</span><span class="o">.</span><span class="n">text</span> <span class="ow">or</span> <span class="s">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="p">(</span><span class="n">second</span><span class="o">.</span><span class="n">text</span> <span class="ow">or</span> <span class="s">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertMultiLineEqual</span><span class="p">((</span><span class="n">first</span><span class="o">.</span><span class="n">tail</span> <span class="ow">or</span> <span class="s">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="p">(</span><span class="n">second</span><span class="o">.</span><span class="n">tail</span> <span class="ow">or</span> <span class="s">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+
+        <span class="n">first</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">first</span> <span class="k">if</span> <span class="n">i</span><span class="o">.</span><span class="n">tag</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">etree</span><span class="o">.</span><span class="n">Comment</span><span class="p">]</span>
+        <span class="n">second</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">second</span> <span class="k">if</span> <span class="n">i</span><span class="o">.</span><span class="n">tag</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">etree</span><span class="o">.</span><span class="n">Comment</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">first</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">second</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="n">second</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertXmlEqual</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">merge_class</span><span class="p">(</span><span class="o">*</span><span class="n">classes</span><span class="p">):</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">class_</span> <span class="ow">in</span> <span class="n">classes</span><span class="p">:</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">class_</span><span class="o">.</span><span class="n">split</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">class_</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">class_</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">result</span>
+
+
+<div class="viewcode-block" id="HTMLWriter"><a class="viewcode-back" href="../htmlwriter.html#htmlwriter.HTMLWriter">[docs]</a><span class="k">class</span> <span class="nc">HTMLWriter</span><span class="p">(</span><span class="n">XMLWriter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Helper class for writing HTML.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_signature</span> <span class="o">=</span> <span class="s">&#39;[doctype: str, ]**root_attributes&#39;</span>
+    <span class="n">_template</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;&lt;template&gt;</span>
+<span class="s">        &lt;a href=&quot;#&quot;/&gt;</span>
+<span class="s">        &lt;abbr/&gt;</span>
+<span class="s">        &lt;acronym/&gt;</span>
+<span class="s">        &lt;address/&gt;</span>
+<span class="s">        &lt;applet/&gt;</span>
+<span class="s">        &lt;area/&gt;</span>
+<span class="s">        &lt;b/&gt;</span>
+<span class="s">        &lt;base/&gt;</span>
+<span class="s">        &lt;basefont/&gt;</span>
+<span class="s">        &lt;bdo/&gt;</span>
+<span class="s">        &lt;big/&gt;</span>
+<span class="s">        &lt;blockquote/&gt;</span>
+<span class="s">        &lt;body/&gt;</span>
+<span class="s">        &lt;br/&gt;</span>
+<span class="s">        &lt;button/&gt;</span>
+<span class="s">        &lt;caption/&gt;</span>
+<span class="s">        &lt;center/&gt;</span>
+<span class="s">        &lt;cite/&gt;</span>
+<span class="s">        &lt;code/&gt;</span>
+<span class="s">        &lt;col/&gt;</span>
+<span class="s">        &lt;colgroup/&gt;</span>
+<span class="s">        &lt;dd/&gt;</span>
+<span class="s">        &lt;del/&gt;</span>
+<span class="s">        &lt;dfn/&gt;</span>
+<span class="s">        &lt;dir/&gt;</span>
+<span class="s">        &lt;div/&gt;</span>
+<span class="s">        &lt;dl/&gt;</span>
+<span class="s">        &lt;dt/&gt;</span>
+<span class="s">        &lt;em/&gt;</span>
+<span class="s">        &lt;fieldset/&gt;</span>
+<span class="s">        &lt;font/&gt;</span>
+<span class="s">        &lt;footer/&gt;</span>
+<span class="s">        &lt;form/&gt;</span>
+<span class="s">        &lt;frame/&gt;</span>
+<span class="s">        &lt;frameset/&gt;</span>
+<span class="s">        &lt;h1/&gt;</span>
+<span class="s">        &lt;h2/&gt;</span>
+<span class="s">        &lt;h3/&gt;</span>
+<span class="s">        &lt;h4/&gt;</span>
+<span class="s">        &lt;h5/&gt;</span>
+<span class="s">        &lt;h6/&gt;</span>
+<span class="s">        &lt;head/&gt;</span>
+<span class="s">        &lt;hr/&gt;</span>
+<span class="s">        &lt;html/&gt;</span>
+<span class="s">        &lt;i/&gt;</span>
+<span class="s">        &lt;iframe/&gt;</span>
+<span class="s">        &lt;img/&gt;</span>
+<span class="s">        &lt;input/&gt;</span>
+<span class="s">        &lt;ins/&gt;</span>
+<span class="s">        &lt;kbd/&gt;</span>
+<span class="s">        &lt;label/&gt;</span>
+<span class="s">        &lt;legend/&gt;</span>
+<span class="s">        &lt;li/&gt;</span>
+<span class="s">        &lt;link/&gt;</span>
+<span class="s">        &lt;map/&gt;</span>
+<span class="s">        &lt;menu/&gt;</span>
+<span class="s">        &lt;meta/&gt;</span>
+<span class="s">        &lt;noframes/&gt;</span>
+<span class="s">        &lt;noscript/&gt;</span>
+<span class="s">        &lt;object/&gt;</span>
+<span class="s">        &lt;ol/&gt;</span>
+<span class="s">        &lt;optgroup/&gt;</span>
+<span class="s">        &lt;option/&gt;</span>
+<span class="s">        &lt;p/&gt;</span>
+<span class="s">        &lt;param/&gt;</span>
+<span class="s">        &lt;pre/&gt;</span>
+<span class="s">        &lt;q/&gt;</span>
+<span class="s">        &lt;s/&gt;</span>
+<span class="s">        &lt;samp/&gt;</span>
+<span class="s">        &lt;script/&gt;</span>
+<span class="s">        &lt;select/&gt;</span>
+<span class="s">        &lt;small/&gt;</span>
+<span class="s">        &lt;span/&gt;</span>
+<span class="s">        &lt;strike/&gt;</span>
+<span class="s">        &lt;strong/&gt;</span>
+<span class="s">        &lt;style/&gt;</span>
+<span class="s">        &lt;sub/&gt;</span>
+<span class="s">        &lt;sup/&gt;</span>
+<span class="s">        &lt;table/&gt;</span>
+<span class="s">        &lt;tbody/&gt;</span>
+<span class="s">        &lt;td/&gt;</span>
+<span class="s">        &lt;textarea/&gt;</span>
+<span class="s">        &lt;tfoot/&gt;</span>
+<span class="s">        &lt;th/&gt;</span>
+<span class="s">        &lt;thead/&gt;</span>
+<span class="s">        &lt;title/&gt;</span>
+<span class="s">        &lt;tr/&gt;</span>
+<span class="s">        &lt;tt/&gt;</span>
+<span class="s">        &lt;u/&gt;</span>
+<span class="s">        &lt;ul/&gt;</span>
+<span class="s">        &lt;var/&gt;</span>
+<span class="s">    &lt;/template&gt;&#39;&#39;&#39;</span>
+    <span class="n">_no_end_tags</span> <span class="o">=</span> <span class="p">{</span>  <span class="c"># from xml.etree.ElementTree.HTML_EMPTY</span>
+        <span class="s">&#39;area&#39;</span><span class="p">,</span>
+        <span class="s">&#39;base&#39;</span><span class="p">,</span>
+        <span class="s">&#39;basefont&#39;</span><span class="p">,</span>
+        <span class="s">&#39;br&#39;</span><span class="p">,</span>
+        <span class="s">&#39;col&#39;</span><span class="p">,</span>
+        <span class="s">&#39;frame&#39;</span><span class="p">,</span>
+        <span class="s">&#39;hr&#39;</span><span class="p">,</span>
+        <span class="s">&#39;img&#39;</span><span class="p">,</span>
+        <span class="s">&#39;input&#39;</span><span class="p">,</span>
+        <span class="s">&#39;isindex&#39;</span><span class="p">,</span>
+        <span class="s">&#39;link&#39;</span><span class="p">,</span>
+        <span class="s">&#39;meta&#39;</span><span class="p">,</span>
+        <span class="s">&#39;param&#39;</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">_require_end_tags</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">&#39;script&#39;</span><span class="p">,</span>
+        <span class="s">&#39;textarea&#39;</span><span class="p">,</span>
+        <span class="s">&#39;span&#39;</span><span class="p">,</span>
+        <span class="s">&#39;div&#39;</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">_attribute_rename_patterns</span> <span class="o">=</span> <span class="n">XMLWriter</span><span class="o">.</span><span class="n">_attribute_rename_patterns</span> <span class="o">+</span> <span class="p">(</span>
+        <span class="p">(</span><span class="s">&#39;^class_$&#39;</span><span class="p">,</span> <span class="s">&#39;class&#39;</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="n">_merge_attribute_handlers</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="s">&#39;class&#39;</span><span class="p">):</span> <span class="n">merge_class</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">_boolean_attributes</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="p">(</span><span class="s">&#39;fieldset&#39;</span><span class="p">,</span> <span class="s">&#39;disabled&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;button&#39;</span><span class="p">,</span> <span class="s">&#39;disabled&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;input&#39;</span><span class="p">,</span> <span class="s">&#39;checked&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;input&#39;</span><span class="p">,</span> <span class="s">&#39;required&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;input&#39;</span><span class="p">,</span> <span class="s">&#39;multiple&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;input&#39;</span><span class="p">,</span> <span class="s">&#39;disabled&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;input&#39;</span><span class="p">,</span> <span class="s">&#39;readonly&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;option&#39;</span><span class="p">,</span> <span class="s">&#39;selected&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;select&#39;</span><span class="p">,</span> <span class="s">&#39;required&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;select&#39;</span><span class="p">,</span> <span class="s">&#39;multiple&#39;</span><span class="p">),</span>
+    <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">root_attributes</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param doctype: XML doctype</span>
+<span class="sd">        :type doctype: str or None</span>
+<span class="sd">        :param root_attributes: root tag attributes</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">args</span> <span class="o">+=</span> <span class="p">(</span><span class="s">&#39;html&#39;</span><span class="p">,</span> <span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">root_attributes</span><span class="p">)</span>
+
+<div class="viewcode-block" id="HTMLWriter.scriptdata"><a class="viewcode-back" href="../htmlwriter.html#htmlwriter.HTMLWriter.scriptdata">[docs]</a>    <span class="k">def</span> <span class="nf">scriptdata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">variables</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Write &quot;&lt;script&gt;name1 = value1, name2 = value2, ...&lt;/script&gt;&quot; with escaping &#39;&lt;&#39; and &#39;&gt;&#39;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">content</span> <span class="o">=</span> <span class="s">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="s">&#39;</span><span class="si">%s</span><span class="s"> = </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">separators</span><span class="o">=</span><span class="p">(</span><span class="s">&#39;,&#39;</span><span class="p">,</span> <span class="s">&#39;:&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;&lt;&#39;</span><span class="p">,</span> <span class="s">&#39;</span><span class="se">\\</span><span class="s">x3c&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;&gt;&#39;</span><span class="p">,</span> <span class="s">&#39;</span><span class="se">\\</span><span class="s">x3e&#39;</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">variables</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="XHTMLWriter"><a class="viewcode-back" href="../htmlwriter.html#htmlwriter.XHTMLWriter">[docs]</a><span class="k">class</span> <span class="nc">XHTMLWriter</span><span class="p">(</span><span class="n">HTMLWriter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Helper class for writing XHTML.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_no_end_tags</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="HTML5Writer"><a class="viewcode-back" href="../htmlwriter.html#htmlwriter.HTML5Writer">[docs]</a><span class="k">class</span> <span class="nc">HTML5Writer</span><span class="p">(</span><span class="n">HTMLWriter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Helper class for writing HTML5.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_signature</span> <span class="o">=</span> <span class="s">&#39;**root_attributes&#39;</span>
+    <span class="n">_template</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;&lt;template&gt;</span>
+<span class="s">        &lt;a href=&quot;#&quot;/&gt;</span>
+<span class="s">        &lt;abbr/&gt;</span>
+<span class="s">        &lt;address/&gt;</span>
+<span class="s">        &lt;area/&gt;</span>
+<span class="s">        &lt;article/&gt;</span>
+<span class="s">        &lt;aside/&gt;</span>
+<span class="s">        &lt;audio/&gt;</span>
+<span class="s">        &lt;b/&gt;</span>
+<span class="s">        &lt;base/&gt;</span>
+<span class="s">        &lt;bdi/&gt;</span>
+<span class="s">        &lt;bdo/&gt;</span>
+<span class="s">        &lt;blockquote/&gt;</span>
+<span class="s">        &lt;body/&gt;</span>
+<span class="s">        &lt;br/&gt;</span>
+<span class="s">        &lt;button/&gt;</span>
+<span class="s">        &lt;canvas/&gt;</span>
+<span class="s">        &lt;caption/&gt;</span>
+<span class="s">        &lt;cite/&gt;</span>
+<span class="s">        &lt;code/&gt;</span>
+<span class="s">        &lt;col/&gt;</span>
+<span class="s">        &lt;colgroup/&gt;</span>
+<span class="s">        &lt;datalist/&gt;</span>
+<span class="s">        &lt;dd/&gt;</span>
+<span class="s">        &lt;del/&gt;</span>
+<span class="s">        &lt;details/&gt;</span>
+<span class="s">        &lt;dfn/&gt;</span>
+<span class="s">        &lt;dialog/&gt;</span>
+<span class="s">        &lt;div/&gt;</span>
+<span class="s">        &lt;dl/&gt;</span>
+<span class="s">        &lt;dt/&gt;</span>
+<span class="s">        &lt;em/&gt;</span>
+<span class="s">        &lt;embed/&gt;</span>
+<span class="s">        &lt;fieldset/&gt;</span>
+<span class="s">        &lt;figcaption/&gt;</span>
+<span class="s">        &lt;figure/&gt;</span>
+<span class="s">        &lt;footer/&gt;</span>
+<span class="s">        &lt;form/&gt;</span>
+<span class="s">        &lt;h1/&gt;</span>
+<span class="s">        &lt;h2/&gt;</span>
+<span class="s">        &lt;h3/&gt;</span>
+<span class="s">        &lt;h4/&gt;</span>
+<span class="s">        &lt;h5/&gt;</span>
+<span class="s">        &lt;h6/&gt;</span>
+<span class="s">        &lt;head/&gt;</span>
+<span class="s">        &lt;header/&gt;</span>
+<span class="s">        &lt;hgroup/&gt;</span>
+<span class="s">        &lt;hr/&gt;</span>
+<span class="s">        &lt;html/&gt;</span>
+<span class="s">        &lt;i/&gt;</span>
+<span class="s">        &lt;iframe/&gt;</span>
+<span class="s">        &lt;img/&gt;</span>
+<span class="s">        &lt;input/&gt;</span>
+<span class="s">        &lt;ins/&gt;</span>
+<span class="s">        &lt;kbd/&gt;</span>
+<span class="s">        &lt;keygen/&gt;</span>
+<span class="s">        &lt;label/&gt;</span>
+<span class="s">        &lt;legend/&gt;</span>
+<span class="s">        &lt;li/&gt;</span>
+<span class="s">        &lt;link/&gt;</span>
+<span class="s">        &lt;main/&gt;</span>
+<span class="s">        &lt;map/&gt;</span>
+<span class="s">        &lt;mark/&gt;</span>
+<span class="s">        &lt;menu/&gt;</span>
+<span class="s">        &lt;menuitem/&gt;</span>
+<span class="s">        &lt;meta/&gt;</span>
+<span class="s">        &lt;meter/&gt;</span>
+<span class="s">        &lt;nav/&gt;</span>
+<span class="s">        &lt;noscript/&gt;</span>
+<span class="s">        &lt;object/&gt;</span>
+<span class="s">        &lt;ol/&gt;</span>
+<span class="s">        &lt;optgroup/&gt;</span>
+<span class="s">        &lt;option/&gt;</span>
+<span class="s">        &lt;output/&gt;</span>
+<span class="s">        &lt;p/&gt;</span>
+<span class="s">        &lt;param/&gt;</span>
+<span class="s">        &lt;pre/&gt;</span>
+<span class="s">        &lt;progress/&gt;</span>
+<span class="s">        &lt;q/&gt;</span>
+<span class="s">        &lt;rp/&gt;</span>
+<span class="s">        &lt;rt/&gt;</span>
+<span class="s">        &lt;ruby/&gt;</span>
+<span class="s">        &lt;s/&gt;</span>
+<span class="s">        &lt;samp/&gt;</span>
+<span class="s">        &lt;script/&gt;</span>
+<span class="s">        &lt;section/&gt;</span>
+<span class="s">        &lt;select/&gt;</span>
+<span class="s">        &lt;small/&gt;</span>
+<span class="s">        &lt;source/&gt;</span>
+<span class="s">        &lt;span/&gt;</span>
+<span class="s">        &lt;strong/&gt;</span>
+<span class="s">        &lt;style/&gt;</span>
+<span class="s">        &lt;sub/&gt;</span>
+<span class="s">        &lt;summary/&gt;</span>
+<span class="s">        &lt;sup/&gt;</span>
+<span class="s">        &lt;table/&gt;</span>
+<span class="s">        &lt;tbody/&gt;</span>
+<span class="s">        &lt;td/&gt;</span>
+<span class="s">        &lt;textarea/&gt;</span>
+<span class="s">        &lt;tfoot/&gt;</span>
+<span class="s">        &lt;th/&gt;</span>
+<span class="s">        &lt;thead/&gt;</span>
+<span class="s">        &lt;time/&gt;</span>
+<span class="s">        &lt;title/&gt;</span>
+<span class="s">        &lt;tr/&gt;</span>
+<span class="s">        &lt;track/&gt;</span>
+<span class="s">        &lt;u/&gt;</span>
+<span class="s">        &lt;ul/&gt;</span>
+<span class="s">        &lt;var/&gt;</span>
+<span class="s">        &lt;video/&gt;</span>
+<span class="s">        &lt;wbr/&gt;</span>
+<span class="s">    &lt;/template&gt;&#39;&#39;&#39;</span>
+    <span class="n">_attribute_rename_patterns</span> <span class="o">=</span> <span class="n">HTMLWriter</span><span class="o">.</span><span class="n">_attribute_rename_patterns</span> <span class="o">+</span> <span class="p">(</span>
+        <span class="p">(</span><span class="s">&#39;^(data|aria)_(.+)&#39;</span><span class="p">,</span> <span class="s">&#39;</span><span class="se">\\</span><span class="s">1-</span><span class="se">\\</span><span class="s">2&#39;</span><span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">root_attributes</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param root_attributes: root tag attributes</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="s">&#39;&lt;!DOCTYPE html&gt;&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">root_attributes</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="Bootstrap3Writer"><a class="viewcode-back" href="../htmlwriter.html#htmlwriter.Bootstrap3Writer">[docs]</a><span class="k">class</span> <span class="nc">Bootstrap3Writer</span><span class="p">(</span><span class="n">HTML5Writer</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Helper class for writing HTML5 with `Bootstrap3 &lt;http://getbootstrap.com/&gt;`_.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@TagMethodHelper</span>
+<div class="viewcode-block" id="Bootstrap3Writer.bs_glyphicon"><a class="viewcode-back" href="../htmlwriter.html#htmlwriter.Bootstrap3Writer.bs_glyphicon">[docs]</a>    <span class="k">def</span> <span class="nf">bs_glyphicon</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">attributes</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Write or enter &quot;&lt;span class=&quot;glyphicon glyphicon-`name`&quot; aria-hidden=&quot;true&quot;/&gt;&quot;.</span>
+<span class="sd">        See :func:`~XMLWriter.tag`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">span</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_merge_attributes</span><span class="p">(</span>
+            <span class="s">&#39;span&#39;</span><span class="p">,</span>
+            <span class="nb">dict</span><span class="p">(</span><span class="n">class_</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;glyphicon&#39;</span><span class="p">,</span> <span class="s">&#39;glyphicon-</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">)},</span> <span class="n">aria_hidden</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+            <span class="n">attributes</span><span class="p">))</span>
+</div>
+    <span class="n">_template</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;&lt;template prefix=&quot;bs_&quot;&gt;</span>
+<span class="s">        &lt;div class=&quot;container&quot;/&gt;</span>
+<span class="s">        &lt;div class=&quot;container-fluid&quot;/&gt;</span>
+<span class="s">        &lt;div class=&quot;row&quot;/&gt;</span>
+<span class="s">        Typography:</span>
+<span class="s">            Lead body copy:</span>
+<span class="s">                &lt;p class=&quot;lead&quot;/&gt;</span>
+<span class="s">            Alignment classes:</span>
+<span class="s">                &lt;p class=&quot;text-left&quot;/&gt;</span>
+<span class="s">                &lt;p class=&quot;text-center&quot;/&gt;</span>
+<span class="s">                &lt;p class=&quot;text-right&quot;/&gt;</span>
+<span class="s">                &lt;p class=&quot;text-justify&quot;/&gt;</span>
+<span class="s">                &lt;p class=&quot;text-nowrap&quot;/&gt;</span>
+<span class="s">            Transformation classes:</span>
+<span class="s">                &lt;p class=&quot;text-lowercase&quot;/&gt;</span>
+<span class="s">                &lt;p class=&quot;text-uppercase&quot;/&gt;</span>
+<span class="s">                &lt;p class=&quot;text-capitalize&quot;/&gt;</span>
+<span class="s">            Blockquote options:</span>
+<span class="s">                &lt;blockquote class=&quot;blockquote-reverse&quot;/&gt;</span>
+<span class="s">            Lists:</span>
+<span class="s">                &lt;ul id=&quot;ul-unstyled&quot; class=&quot;list-unstyled&quot;/&gt;</span>
+<span class="s">                &lt;ul id=&quot;ul-inline&quot; class=&quot;list-inline&quot;/&gt;</span>
+<span class="s">                &lt;ol id=&quot;ol-unstyled&quot; class=&quot;list-unstyled&quot;/&gt;</span>
+<span class="s">                &lt;ol id=&quot;ol-inline&quot; class=&quot;list-inline&quot;/&gt;</span>
+<span class="s">                &lt;dl class=&quot;dl-horizontal&quot;/&gt;</span>
+<span class="s">            Tables:</span>
+<span class="s">                &lt;table class=&quot;table&quot;/&gt;</span>
+<span class="s">                &lt;table id=&quot;table-striped&quot; class=&quot;table table-striped&quot;/&gt;</span>
+<span class="s">                &lt;table id=&quot;table-bordered&quot; class=&quot;table table-bordered&quot;/&gt;</span>
+<span class="s">                &lt;table id=&quot;table-hover&quot; class=&quot;table table-hover&quot;/&gt;</span>
+<span class="s">                &lt;table id=&quot;table-condensed&quot; class=&quot;table table-condensed&quot;/&gt;</span>
+<span class="s">                &lt;div class=&quot;table-responsive&quot;&gt;</span>
+<span class="s">                    &lt;table class=&quot;table&quot; template-attributes=&quot;*&quot;&gt;</span>
+<span class="s">                        &lt;template-content/&gt;</span>
+<span class="s">                        &lt;template-yield/&gt;</span>
+<span class="s">                    &lt;/table&gt;</span>
+<span class="s">                &lt;/div&gt;</span>
+<span class="s">        Forms:</span>
+<span class="s">            &lt;form id=&quot;form&quot; role=&quot;form&quot;/&gt;</span>
+<span class="s">            &lt;form class=&quot;form-inline&quot; role=&quot;form&quot;/&gt;</span>
+<span class="s">            &lt;form class=&quot;form-horizontal&quot; role=&quot;form&quot;/&gt;</span>
+<span class="s">            &lt;div class=&quot;form-group&quot;/&gt;</span>
+<span class="s">            &lt;p class=&quot;help-block&quot;/&gt;</span>
+<span class="s">            &lt;input id=&quot;input&quot; class=&quot;form-control&quot;/&gt;</span>
+<span class="s">            &lt;textarea id=&quot;textarea&quot; class=&quot;form-control&quot;/&gt;</span>
+<span class="s">            &lt;select id=&quot;select&quot; class=&quot;form-control&quot;/&gt;</span>
+<span class="s">            &lt;p class=&quot;form-control-static&quot;/&gt;</span>
+<span class="s">            &lt;label class=&quot;control-label&quot;/&gt;</span>
+<span class="s">            &lt;div class=&quot;checkbox&quot;&gt;</span>
+<span class="s">                &lt;label&gt;</span>
+<span class="s">                    &lt;input type=&quot;checkbox&quot; template-attributes=&quot;*&quot;/&gt;</span>
+<span class="s">                    &lt;template-content/&gt;</span>
+<span class="s">                    &lt;template-yield/&gt;</span>
+<span class="s">                 &lt;/label&gt;</span>
+<span class="s">            &lt;/div&gt;</span>
+<span class="s">            &lt;div class=&quot;radio&quot;&gt;</span>
+<span class="s">                &lt;label&gt;</span>
+<span class="s">                    &lt;input type=&quot;radio&quot; template-attributes=&quot;*&quot;/&gt;</span>
+<span class="s">                    &lt;template-content/&gt;</span>
+<span class="s">                    &lt;template-yield/&gt;</span>
+<span class="s">                &lt;/label&gt;</span>
+<span class="s">            &lt;/div&gt;</span>
+<span class="s">            &lt;label class=&quot;checkbox-inline&quot;&gt;</span>
+<span class="s">                &lt;input type=&quot;checkbox&quot; template-attributes=&quot;*&quot;/&gt;</span>
+<span class="s">                &lt;template-content/&gt;</span>
+<span class="s">                &lt;template-yield/&gt;</span>
+<span class="s">            &lt;/label&gt;</span>
+<span class="s">            &lt;label class=&quot;radio-inline&quot;&gt;</span>
+<span class="s">                &lt;input type=&quot;radio&quot; template-attributes=&quot;*&quot;/&gt;</span>
+<span class="s">                &lt;template-content/&gt;</span>
+<span class="s">                &lt;template-yield/&gt;</span>
+<span class="s">            &lt;/label&gt;</span>
+<span class="s">        Buttons:</span>
+<span class="s">            &lt;button id=&quot;btn-default&quot; type=&quot;button&quot; class=&quot;btn btn-default&quot;/&gt;</span>
+<span class="s">            &lt;button id=&quot;btn-primary&quot; type=&quot;button&quot; class=&quot;btn btn-primary&quot;/&gt;</span>
+<span class="s">            &lt;button id=&quot;btn-success&quot; type=&quot;button&quot; class=&quot;btn btn-success&quot;/&gt;</span>
+<span class="s">            &lt;button id=&quot;btn-info&quot; type=&quot;button&quot; class=&quot;btn btn-info&quot;/&gt;</span>
+<span class="s">            &lt;button id=&quot;btn-warning&quot; type=&quot;button&quot; class=&quot;btn btn-warning&quot;/&gt;</span>
+<span class="s">            &lt;button id=&quot;btn-danger&quot; type=&quot;button&quot; class=&quot;btn btn-danger&quot;/&gt;</span>
+<span class="s">            &lt;button id=&quot;btn-link&quot; type=&quot;button&quot; class=&quot;btn btn-link&quot;/&gt;</span>
+<span class="s">        Images:</span>
+<span class="s">            &lt;img class=&quot;img-responsive&quot;/&gt;</span>
+<span class="s">            &lt;img class=&quot;img-rounded&quot;/&gt;</span>
+<span class="s">            &lt;img class=&quot;img-circle&quot;/&gt;</span>
+<span class="s">            &lt;img class=&quot;img-thumbnail&quot;/&gt;</span>
+<span class="s">        Helper classes:</span>
+<span class="s">            Contextual colors:</span>
+<span class="s">                &lt;p class=&quot;text-muted&quot;/&gt;</span>
+<span class="s">                &lt;p class=&quot;text-primary&quot;/&gt;</span>
+<span class="s">                &lt;p class=&quot;text-success&quot;/&gt;</span>
+<span class="s">                &lt;p class=&quot;text-info&quot;/&gt;</span>
+<span class="s">                &lt;p class=&quot;text-warning&quot;/&gt;</span>
+<span class="s">                &lt;p class=&quot;text-danger&quot;/&gt;</span>
+<span class="s">            Contextual backgrounds:</span>
+<span class="s">                &lt;p class=&quot;bg-primary&quot;/&gt;</span>
+<span class="s">                &lt;p class=&quot;bg-success&quot;/&gt;</span>
+<span class="s">                &lt;p class=&quot;bg-info&quot;/&gt;</span>
+<span class="s">                &lt;p class=&quot;bg-warning&quot;/&gt;</span>
+<span class="s">                &lt;p class=&quot;bg-danger&quot;/&gt;</span>
+<span class="s">            Close icon:</span>
+<span class="s">                &lt;button type=&quot;button&quot; class=&quot;close&quot; template-attributes=&quot;*&quot;&gt;</span>
+<span class="s">                    &lt;span aria-hidden=&quot;true&quot;&gt;&amp;times;&lt;/span&gt;</span>
+<span class="s">                    &lt;span class=&quot;sr-only&quot;&gt;</span>
+<span class="s">                        &lt;template-content&gt;Close&lt;/template-content&gt;</span>
+<span class="s">                    &lt;/span&gt;</span>
+<span class="s">                    &lt;template-yield/&gt;</span>
+<span class="s">                &lt;/button&gt;</span>
+<span class="s">            Carets:</span>
+<span class="s">                &lt;span class=&quot;caret&quot;&gt;&lt;/span&gt;</span>
+<span class="s">            Quick floats:</span>
+<span class="s">                &lt;div class=&quot;pull-left&quot;/&gt;</span>
+<span class="s">                &lt;div class=&quot;pull-right&quot;/&gt;</span>
+<span class="s">            Center content blocks:</span>
+<span class="s">                &lt;div class=&quot;center-block&quot;/&gt;</span>
+<span class="s">            Clearfix:</span>
+<span class="s">                &lt;div class=&quot;clearfix&quot;/&gt;</span>
+<span class="s">        &lt;li id=&quot;menuitem&quot; role=&quot;presentation&quot; template-attribute-map-class=&quot;active, disabled&quot;&gt;</span>
+<span class="s">            &lt;a href=&quot;#&quot; role=&quot;menuitem&quot; tabindex=&quot;-1&quot; template-attributes=&quot;*, -active, -disabled&quot;&gt;</span>
+<span class="s">                &lt;template-content/&gt;</span>
+<span class="s">                &lt;template-yield/&gt;</span>
+<span class="s">            &lt;/a&gt;</span>
+<span class="s">        &lt;/li&gt;</span>
+<span class="s">        Dropdowns:</span>
+<span class="s">            &lt;div class=&quot;dropdown&quot;/&gt;</span>
+<span class="s">            TODO: aria-expanded=&quot;true|false&quot;</span>
+<span class="s">            &lt;button id=&quot;dropdown-toggle&quot; type=&quot;button&quot; class=&quot;btn btn-default dropdown-toggle&quot; data-toggle=&quot;dropdown&quot;/&gt;</span>
+<span class="s">            &lt;ul class=&quot;dropdown-menu&quot; role=&#39;menu&#39;/&gt;</span>
+<span class="s">            &lt;ul id=&quot;dropdown-menu-right&quot; class=&quot;dropdown-menu dropdown-menu-right&quot; role=&quot;menu&quot;/&gt;</span>
+<span class="s">            &lt;li class=&quot;dropdown-header&quot; role=&quot;presentation&quot;/&gt;</span>
+<span class="s">            &lt;li class=&quot;divider&quot; role=&quot;presentation&quot;/&gt;</span>
+<span class="s">        Button groups:</span>
+<span class="s">            &lt;div class=&quot;btn-group&quot; role=&quot;group&quot;/&gt;</span>
+<span class="s">            &lt;div class=&quot;btn-toolbar&quot; role=&quot;toolbar&quot;/&gt;</span>
+<span class="s">            &lt;div class=&quot;btn-group-vertical&quot; role=&quot;group&quot;/&gt;</span>
+<span class="s">            &lt;div id=&quot;btn-group-justified&quot; class=&quot;btn-group btn-group-justified&quot; role=&quot;group&quot;/&gt;</span>
+<span class="s">        Input groups:</span>
+<span class="s">            &lt;div class=&quot;input-group&quot;/&gt;</span>
+<span class="s">            &lt;div id=&quot;input-group-lg&quot; class=&quot;input-group input-group-lg&quot;/&gt;</span>
+<span class="s">            &lt;div id=&quot;input-group-sm&quot; class=&quot;input-group input-group-sm&quot;/&gt;</span>
+<span class="s">            &lt;span class=&quot;input-group-addon&quot;/&gt;</span>
+<span class="s">            &lt;span class=&quot;input-group-btn&quot;&gt;</span>
+<span class="s">                &lt;button class=&quot;btn btn-default&quot; type=&quot;button&quot; template-attributes=&quot;*&quot;&gt;</span>
+<span class="s">                    &lt;template-content/&gt;</span>
+<span class="s">                    &lt;template-yield/&gt;</span>
+<span class="s">                &lt;/button&gt;</span>
+<span class="s">            &lt;/span&gt;</span>
+<span class="s">            ...</span>
+<span class="s">        Navs:</span>
+<span class="s">            &lt;ul id=&quot;nav-tabs&quot; class=&quot;nav nav-tabs&quot;/&gt;</span>
+<span class="s">            &lt;ul id=&quot;nav-pills&quot; class=&quot;nav nav-pills&quot;/&gt;</span>
+<span class="s">            &lt;ul id=&quot;nav-pills-stacked&quot; class=&quot;nav nav-pills nav-stacked&quot;/&gt;</span>
+<span class="s">            &lt;ul id=&quot;nav-tabs-justified&quot; class=&quot;nav nav-tabs nav-justified&quot;/&gt;</span>
+<span class="s">            &lt;ul id=&quot;nav-pills-justified&quot; class=&quot;nav nav-pills nav-justified&quot;/&gt;</span>
+<span class="s">            &lt;li id=&quot;nav-dropdown&quot; role=&quot;presentation&quot; class=&quot;dropdown&quot;/&gt;</span>
+<span class="s">        Navbar:</span>
+<span class="s">            &lt;nav id=&quot;navbar-default&quot; class=&quot;navbar navbar-default&quot; role=&quot;navigation&quot;/&gt;</span>
+<span class="s">            &lt;div class=&quot;navbar-header&quot;/&gt;</span>
+<span class="s">            ...</span>
+<span class="s">        Pager:</span>
+<span class="s">            &lt;ul class=&quot;pager&quot;/&gt;</span>
+<span class="s">            &lt;li class=&quot;previous&quot; template-attribute-map-class=&quot;disabled&quot;&gt;</span>
+<span class="s">                &lt;a href=&quot;#&quot; template-attributes=&quot;*, -disabled&quot;&gt;</span>
+<span class="s">                    &lt;span aria-hidden=&quot;true&quot;&gt;&amp;larr;&lt;/span&gt;</span>
+<span class="s">                    &lt;template-content/&gt;</span>
+<span class="s">                    &lt;template-yield/&gt;</span>
+<span class="s">                &lt;/a&gt;</span>
+<span class="s">            &lt;/li&gt;</span>
+<span class="s">            &lt;li class=&quot;next&quot; template-attribute-map-class=&quot;disabled&quot;&gt;</span>
+<span class="s">                &lt;a href=&quot;#&quot; template-attributes=&quot;*, -disabled&quot;&gt;</span>
+<span class="s">                    &lt;template-content/&gt;</span>
+<span class="s">                    &lt;template-yield/&gt;</span>
+<span class="s">                    &lt;span aria-hidden=&quot;true&quot;&gt;&amp;rarr;&lt;/span&gt;</span>
+<span class="s">                &lt;/a&gt;</span>
+<span class="s">            &lt;/li&gt;</span>
+<span class="s">        Labels:</span>
+<span class="s">            &lt;span id=&quot;label-default&quot; class=&quot;label label-default&quot;/&gt;</span>
+<span class="s">            &lt;span id=&quot;label-primary&quot; class=&quot;label label-primary&quot;/&gt;</span>
+<span class="s">            &lt;span id=&quot;label-success&quot; class=&quot;label label-success&quot;/&gt;</span>
+<span class="s">            &lt;span id=&quot;label-info&quot; class=&quot;label label-info&quot;/&gt;</span>
+<span class="s">            &lt;span id=&quot;label-warning&quot; class=&quot;label label-warning&quot;/&gt;</span>
+<span class="s">            &lt;span id=&quot;label-danger&quot; class=&quot;label label-danger&quot;/&gt;</span>
+<span class="s">        Badges:</span>
+<span class="s">            &lt;span class=&quot;badge&quot;/&gt;</span>
+<span class="s">        Jumbotron:</span>
+<span class="s">            &lt;div class=&quot;jumbotron&quot;/&gt;</span>
+<span class="s">        Page header:</span>
+<span class="s">            &lt;div class=&quot;page-header&quot;/&gt;</span>
+<span class="s">        Alerts:</span>
+<span class="s">            &lt;div id=&quot;alert-success&quot; class=&quot;alert alert-success&quot; role=&quot;alert&quot;/&gt;</span>
+<span class="s">            &lt;div id=&quot;alert-info&quot; class=&quot;alert alert-info&quot; role=&quot;alert&quot;/&gt;</span>
+<span class="s">            &lt;div id=&quot;alert-warning&quot; class=&quot;alert alert-warning&quot; role=&quot;alert&quot;/&gt;</span>
+<span class="s">            &lt;div id=&quot;alert-danger&quot; class=&quot;alert alert-danger&quot; role=&quot;alert&quot;/&gt;</span>
+<span class="s">        Panel:</span>
+<span class="s">            &lt;div id=&quot;panel-primary&quot; class=&quot;panel panel-primary&quot;/&gt;</span>
+<span class="s">            &lt;div id=&quot;panel-success&quot; class=&quot;panel panel-success&quot;/&gt;</span>
+<span class="s">            &lt;div id=&quot;panel-info&quot; class=&quot;panel panel-info&quot;/&gt;</span>
+<span class="s">            &lt;div id=&quot;panel-warning&quot; class=&quot;panel panel-warning&quot;/&gt;</span>
+<span class="s">            &lt;div id=&quot;panel-danger&quot; class=&quot;panel panel-danger&quot;/&gt;</span>
+<span class="s">            &lt;div class=&quot;panel-heading&quot;/&gt;</span>
+<span class="s">            &lt;div class=&quot;panel-body&quot;/&gt;</span>
+<span class="s">            &lt;div class=&quot;panel-footer&quot;/&gt;</span>
+<span class="s">        Modal:</span>
+<span class="s">            .fade is removed</span>
+<span class="s">            &lt;div id=&quot;modal-dialog&quot; class=&quot;modal&quot; tabindex=&quot;-1&quot; role=&quot;dialog&quot; aria-hidden=&quot;true&quot; template-attributes=&quot;*&quot;&gt;</span>
+<span class="s">                &lt;div class=&quot;modal-dialog&quot;&gt;</span>
+<span class="s">                    &lt;div class=&quot;modal-content&quot;&gt;</span>
+<span class="s">                        &lt;template-content/&gt;</span>
+<span class="s">                        &lt;template-yield/&gt;</span>
+<span class="s">                    &lt;/div&gt;</span>
+<span class="s">                &lt;/div&gt;</span>
+<span class="s">            &lt;/div&gt;</span>
+<span class="s">            &lt;div id=&quot;modal-dialog-lg&quot; class=&quot;modal&quot; tabindex=&quot;-1&quot; role=&quot;dialog&quot; aria-hidden=&quot;true&quot; template-attributes=&quot;*&quot;&gt;</span>
+<span class="s">                &lt;div class=&quot;modal-dialog modal-lg&quot;&gt;</span>
+<span class="s">                    &lt;div class=&quot;modal-content&quot;&gt;</span>
+<span class="s">                        &lt;template-content/&gt;</span>
+<span class="s">                        &lt;template-yield/&gt;</span>
+<span class="s">                    &lt;/div&gt;</span>
+<span class="s">                &lt;/div&gt;</span>
+<span class="s">            &lt;/div&gt;</span>
+<span class="s">            &lt;div id=&quot;modal-dialog-sm&quot; class=&quot;modal&quot; tabindex=&quot;-1&quot; role=&quot;dialog&quot; aria-hidden=&quot;true&quot; template-attributes=&quot;*&quot;&gt;</span>
+<span class="s">                &lt;div class=&quot;modal-dialog modal-sm&quot;&gt;</span>
+<span class="s">                    &lt;div class=&quot;modal-content&quot;&gt;</span>
+<span class="s">                        &lt;template-content/&gt;</span>
+<span class="s">                        &lt;template-yield/&gt;</span>
+<span class="s">                    &lt;/div&gt;</span>
+<span class="s">                &lt;/div&gt;</span>
+<span class="s">            &lt;/div&gt;</span>
+<span class="s">            &lt;div class=&quot;modal-header&quot;/&gt;</span>
+<span class="s">            &lt;div class=&quot;modal-body&quot;/&gt;</span>
+<span class="s">            &lt;div class=&quot;modal-footer&quot;/&gt;</span>
+<span class="s">            &lt;button id=&quot;modal-close-icon&quot; type=&quot;button&quot; class=&quot;close&quot; data-dismiss=&quot;modal&quot;&gt;</span>
+<span class="s">                &lt;span aria-hidden=&quot;true&quot;&gt;&amp;times;&lt;/span&gt;</span>
+<span class="s">                &lt;span class=&quot;sr-only&quot;&gt;</span>
+<span class="s">                    &lt;template-content&gt;Close&lt;/template-content&gt;</span>
+<span class="s">                &lt;/span&gt;</span>
+<span class="s">                &lt;template-yield/&gt;</span>
+<span class="s">            &lt;/button&gt;</span>
+<span class="s">            &lt;button id=&quot;modal-close-button&quot; type=&quot;button&quot; class=&quot;btn btn-default&quot; data-dismiss=&quot;modal&quot;&gt;</span>
+<span class="s">                &lt;template-content&gt;Close&lt;/template-content&gt;</span>
+<span class="s">                &lt;template-yield/&gt;</span>
+<span class="s">            &lt;/button&gt;</span>
+<span class="s">    &lt;/template&gt;&#39;&#39;&#39;</span></div>
+</pre></div>
+
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2014, chrono-meter@gmx.net.
+    </p>
+  </div>
+
+  <a href="https://github.com/snide/sphinx_rtd_theme">Sphinx theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'1.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

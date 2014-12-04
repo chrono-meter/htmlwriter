@@ -1,0 +1,644 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Custom writer &mdash; htmlwriter 1.0.0 documentation</title>
+  
+
+  
+  
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="top" title="htmlwriter 1.0.0 documentation" href="index.html"/>
+        <link rel="prev" title="module ‘htmlwriter’" href="htmlwriter.html"/> 
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        <a href="index.html" class="fa fa-home"> htmlwriter</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+        
+            <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="htmlwriter.html">module &#8216;htmlwriter&#8217;</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="htmlwriter.html#htmlwriter-html-with-python-codes">htmlwriter - HTML with Python codes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="htmlwriter.html#xmlwriter">XMLWriter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="htmlwriter.html#htmlwriter">HTMLWriter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="htmlwriter.html#xhtmlwriter">XHTMLWriter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="htmlwriter.html#html5writer">HTML5Writer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="htmlwriter.html#bootstrap3writer">Bootstrap3Writer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="htmlwriter.html#constants">Constants</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Custom writer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#template">Template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#tagmethodhelper">TagMethodHelper</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#renaming-and-merging-attribute">Renaming and merging attribute</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#internal">Internal</a></li>
+</ul>
+</li>
+</ul>
+
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">htmlwriter</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Custom writer</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          <a href="_sources/extend.txt" rel="nofollow"> View page source</a>
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            
+  <div class="section" id="custom-writer">
+<h1>Custom writer<a class="headerlink" href="#custom-writer" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="template">
+<h2>Template<a class="headerlink" href="#template" title="Permalink to this headline">¶</a></h2>
+<p>Easiest way, you can create shorthand method from template.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">htmlwriter</span> <span class="kn">import</span> <span class="n">XMLWriter</span>
+
+<span class="k">class</span> <span class="nc">CustomWriter</span><span class="p">(</span><span class="n">XMLWriter</span><span class="p">):</span>
+    <span class="n">_template</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;&lt;template prefix=&quot;my_&quot;&gt;</span>
+
+<span class="s">        most simple example:</span>
+<span class="s">            &lt;tag1/&gt;</span>
+
+<span class="s">        with default attributes:</span>
+<span class="s">            &lt;tag2 attr1=&quot;default value&quot;/&gt;</span>
+
+<span class="s">        nested:</span>
+<span class="s">            &lt;wrap&gt;</span>
+<span class="s">                &lt;tag3 template-attributes=&quot;*&quot;&gt;</span>
+<span class="s">                    &lt;template-content/&gt;</span>
+<span class="s">                    &lt;template-yield/&gt;</span>
+<span class="s">                &lt;/tag3&gt;</span>
+<span class="s">            &lt;/wrap&gt;</span>
+
+<span class="s">    &lt;/template&gt;&#39;&#39;&#39;</span>
+</pre></div>
+</div>
+<div class="section" id="naming-convention">
+<h3>Naming convention<a class="headerlink" href="#naming-convention" title="Permalink to this headline">¶</a></h3>
+<p>Method name is determined from <cite>prefix</cite> attribute of root element and attribute of each element.</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>If element has a <cite>id</cite> attribute, the method name is <cite>prefix</cite> + <cite>id</cite>. And <cite>id</cite> attribute will be removed from
+element.</li>
+<li>If element has a <cite>class</cite> attribute and it is only single class, the name is <cite>prefix</cite> + <cite>class</cite>.</li>
+</ol>
+</div></blockquote>
+<p>See source of <a class="reference internal" href="#htmlwriter.PreProcessor.get_name" title="htmlwriter.PreProcessor.get_name"><tt class="xref py py-meth docutils literal"><span class="pre">get_name()</span></tt></a>.</p>
+</div>
+<div class="section" id="not-nested-element">
+<h3>Not nested element<a class="headerlink" href="#not-nested-element" title="Permalink to this headline">¶</a></h3>
+<p>The method created from not nested element is a shortcut of <tt class="xref py py-meth docutils literal"><span class="pre">_tag()</span></tt>. Tag name is first
+positional argument, content and attributes are default arguments.</p>
+<p>See source of <a class="reference internal" href="#htmlwriter.PreProcessor.make_from_shallow" title="htmlwriter.PreProcessor.make_from_shallow"><tt class="xref py py-meth docutils literal"><span class="pre">make_from_shallow()</span></tt></a> and <a class="reference internal" href="#htmlwriter.PreProcessor.make_from_deep" title="htmlwriter.PreProcessor.make_from_deep"><tt class="xref py py-meth docutils literal"><span class="pre">make_from_deep()</span></tt></a>.</p>
+</div>
+<div class="section" id="element-template-content">
+<h3>Element <cite>template-content</cite><a class="headerlink" href="#element-template-content" title="Permalink to this headline">¶</a></h3>
+<p>This element will be replaced with first positional argument.</p>
+<p>See source of <a class="reference internal" href="#htmlwriter.PreProcessor.make_from_deep" title="htmlwriter.PreProcessor.make_from_deep"><tt class="xref py py-meth docutils literal"><span class="pre">make_from_deep()</span></tt></a>.</p>
+</div>
+<div class="section" id="element-template-yield">
+<h3>Element <cite>template-yield</cite><a class="headerlink" href="#element-template-yield" title="Permalink to this headline">¶</a></h3>
+<p>The method will pause this element in <cite>with statement</cite>.</p>
+<p>See source of <a class="reference internal" href="#htmlwriter.PreProcessor.make_from_deep" title="htmlwriter.PreProcessor.make_from_deep"><tt class="xref py py-meth docutils literal"><span class="pre">make_from_deep()</span></tt></a>.</p>
+</div>
+<div class="section" id="attribute-template-attributes">
+<h3>Attribute <cite>template-attributes</cite><a class="headerlink" href="#attribute-template-attributes" title="Permalink to this headline">¶</a></h3>
+<p>Filter and copy attributes argument in this element. Default attributes will be overwritten or merged.</p>
+<dl class="docutils">
+<dt>Rule:</dt>
+<dd><ul class="first last simple">
+<li>Patterns are separated with &#8221; &#8221; or &#8221;,&#8221;.</li>
+<li>Pattern is glob style pattern. See <tt class="xref py py-meth docutils literal"><span class="pre">translate()</span></tt>.</li>
+<li>Pattern that starts with &#8220;-&#8221; is a exclude pattern.</li>
+</ul>
+</dd>
+</dl>
+<p>See source of <a class="reference internal" href="#htmlwriter.PreProcessor.handle_attributes" title="htmlwriter.PreProcessor.handle_attributes"><tt class="xref py py-meth docutils literal"><span class="pre">handle_attributes()</span></tt></a>.</p>
+</div>
+<div class="section" id="attribute-template-attribute-map-class">
+<h3>Attribute <cite>template-attribute-map-class</cite><a class="headerlink" href="#attribute-template-attribute-map-class" title="Permalink to this headline">¶</a></h3>
+<p>Generate <cite>class</cite> attribute from attributes.</p>
+<dl class="docutils">
+<dt>Rule:</dt>
+<dd><ul class="first last simple">
+<li>Patterns are separated with &#8221;,&#8221;.</li>
+<li>Source attribute name and target class name are separated with &#8220;as&#8221;.</li>
+<li>If no &#8220;as&#8221;, target class name is same as source attribute name.</li>
+<li>Source attribute value will be evaluated as <cite>bool</cite>.</li>
+</ul>
+</dd>
+</dl>
+<p>See source of <a class="reference internal" href="#htmlwriter.PreProcessor.handle_attribute_map_class" title="htmlwriter.PreProcessor.handle_attribute_map_class"><tt class="xref py py-meth docutils literal"><span class="pre">handle_attribute_map_class()</span></tt></a>.</p>
+</div>
+<div class="section" id="examples">
+<h3>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h3>
+<p><tt class="xref py py-attr docutils literal"><span class="pre">_template</span></tt> attribute in <a class="reference internal" href="htmlwriter.html#htmlwriter.HTMLWriter" title="htmlwriter.HTMLWriter"><tt class="xref py py-class docutils literal"><span class="pre">HTMLWriter</span></tt></a></p>
+<p><tt class="xref py py-attr docutils literal"><span class="pre">_template</span></tt> attribute in <a class="reference internal" href="htmlwriter.html#htmlwriter.HTML5Writer" title="htmlwriter.HTML5Writer"><tt class="xref py py-class docutils literal"><span class="pre">HTML5Writer</span></tt></a></p>
+<p><tt class="xref py py-attr docutils literal"><span class="pre">_template</span></tt> attribute in <a class="reference internal" href="htmlwriter.html#htmlwriter.Bootstrap3Writer" title="htmlwriter.Bootstrap3Writer"><tt class="xref py py-class docutils literal"><span class="pre">Bootstrap3Writer</span></tt></a></p>
+</div>
+</div>
+<div class="section" id="tagmethodhelper">
+<h2>TagMethodHelper<a class="headerlink" href="#tagmethodhelper" title="Permalink to this headline">¶</a></h2>
+<p>Another way, wrap method by <a class="reference internal" href="#htmlwriter.TagMethodHelper" title="htmlwriter.TagMethodHelper"><tt class="xref py py-class docutils literal"><span class="pre">TagMethodHelper</span></tt></a>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">contextlib</span>
+<span class="kn">from</span> <span class="nn">htmlwriter</span> <span class="kn">import</span> <span class="n">XMLWriter</span><span class="p">,</span> <span class="n">TagMethodHelper</span>
+
+<span class="k">class</span> <span class="nc">CustomWriter</span><span class="p">(</span><span class="n">XMLWriter</span><span class="p">):</span>
+
+    <span class="c"># default attributes</span>
+    <span class="nd">@TagMethodHelper</span>
+    <span class="k">def</span> <span class="nf">shallow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">attr1</span><span class="o">=</span><span class="s">&#39;val1&#39;</span><span class="p">,</span> <span class="n">attr2</span><span class="o">=</span><span class="s">&#39;val2&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">attributes</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="s">&#39;tag_name&#39;</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">attr1</span><span class="o">=</span><span class="n">attr1</span><span class="p">,</span> <span class="n">attr2</span><span class="o">=</span><span class="n">attr2</span><span class="p">,</span> <span class="o">**</span><span class="n">attributes</span><span class="p">)</span>
+
+    <span class="nd">@TagMethodHelper</span>
+    <span class="nd">@contextlib.contextmanager</span>
+    <span class="k">def</span> <span class="nf">nested</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">attributes</span><span class="p">):</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="s">&#39;parent&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="s">&#39;self&#39;</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">attributes</span><span class="p">):</span>
+            <span class="k">yield</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">You must use <cite>*args</cite> for accept any attribute name. If you use positional argument for example <cite>text</cite>, you
+can&#8217;t use attribute named <cite>text</cite>.</p>
+</div>
+<div class="section" id="id1">
+<h3>Examples<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference internal" href="htmlwriter.html#htmlwriter.Bootstrap3Writer.bs_glyphicon" title="htmlwriter.Bootstrap3Writer.bs_glyphicon"><tt class="xref py py-meth docutils literal"><span class="pre">bs_glyphicon()</span></tt></a></p>
+</div>
+</div>
+<div class="section" id="renaming-and-merging-attribute">
+<h2>Renaming and merging attribute<a class="headerlink" href="#renaming-and-merging-attribute" title="Permalink to this headline">¶</a></h2>
+<p>For customize renaming attribute, use <a class="reference internal" href="#htmlwriter.XMLWriter._attribute_rename_patterns" title="htmlwriter.XMLWriter._attribute_rename_patterns"><tt class="xref py py-attr docutils literal"><span class="pre">_attribute_rename_patterns</span></tt></a> in subclass.</p>
+<p>For customize merging attribute, use <a class="reference internal" href="#htmlwriter.XMLWriter._merge_attribute_handlers" title="htmlwriter.XMLWriter._merge_attribute_handlers"><tt class="xref py py-attr docutils literal"><span class="pre">_merge_attribute_handlers</span></tt></a> in subclass.</p>
+<p>See source of <a class="reference internal" href="#htmlwriter.XMLWriter._merge_attributes" title="htmlwriter.XMLWriter._merge_attributes"><tt class="xref py py-meth docutils literal"><span class="pre">_merge_attributes()</span></tt></a> for implementation.</p>
+</div>
+<div class="section" id="internal">
+<h2>Internal<a class="headerlink" href="#internal" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="htmlwriter.XMLWriter">
+<em class="property">class </em><tt class="descclassname">htmlwriter.</tt><tt class="descname">XMLWriter</tt><big>(</big><span class="optional">[</span><em>doctype: str</em>, <span class="optional">]</span><em>root_tag: str</em>, <em>**root_attributes</em><big>)</big><a class="reference internal" href="_modules/htmlwriter.html#XMLWriter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#htmlwriter.XMLWriter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base writer class. This provides useful functions for writing XML content.</p>
+<dl class="docutils">
+<dt>Simplest usage:</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">writer</span> <span class="o">=</span> <span class="n">XMLWriter</span><span class="p">(</span><span class="s">&#39;html&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">writer</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="s">&#39;body&#39;</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">writer</span><span class="o">.</span><span class="n">tag</span><span class="p">(</span><span class="s">&#39;p&#39;</span><span class="p">,</span> <span class="s">&#39;hello, world&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">writer</span><span class="o">.</span><span class="n">getvalue</span><span class="p">()</span>
+<span class="go">&#39;&lt;html&gt;&lt;body&gt;&lt;p&gt;hello, world&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;&#39;</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+<p>Note that <tt class="xref py py-meth docutils literal"><span class="pre">tag()</span></tt> returns
+<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#context-manager-types">context manager</a>.
+So you can use <a class="reference external" href="https://docs.python.org/3/reference/compound_stmts.html#with">with statement</a> with it.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>doctype</strong> (<em>str or None</em>) &#8211; XML doctype</li>
+<li><strong>root_tag</strong> (<em>str</em>) &#8211; root tag name</li>
+<li><strong>root_attributes</strong> &#8211; root tag attributes</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>See <a class="reference internal" href="htmlwriter.html#htmlwriter.XMLWriter" title="htmlwriter.XMLWriter"><tt class="xref py py-class docutils literal"><span class="pre">XMLWriter</span></tt></a> for public interface.</p>
+<dl class="attribute">
+<dt id="htmlwriter.XMLWriter._attribute_rename_patterns">
+<tt class="descname">_attribute_rename_patterns</tt><em class="property"> = (('^(xml|xmlns)_(.+)', '\\1:\\2'),)</em><a class="headerlink" href="#htmlwriter.XMLWriter._attribute_rename_patterns" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tuple of attribute renaming pattern.
+Item may be <cite>(pattern, repl)</cite> (1st and 2nd argument for <cite>re.sub</cite>).
+See source of <a class="reference internal" href="#htmlwriter.XMLWriter._merge_attributes" title="htmlwriter.XMLWriter._merge_attributes"><tt class="xref py py-meth docutils literal"><span class="pre">_merge_attributes()</span></tt></a> for implementation.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="htmlwriter.XMLWriter._boolean_attributes">
+<tt class="descname">_boolean_attributes</tt><em class="property"> = set()</em><a class="headerlink" href="#htmlwriter.XMLWriter._boolean_attributes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tuple of boolean attribute (attribute without value. ex &lt;input disabled/&gt;).
+Item may be <cite>(None, &#8216;attribute_name&#8217;)</cite> or <cite>(&#8216;tag_name&#8217;, &#8216;attribute_name&#8217;)</cite>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="htmlwriter.XMLWriter._get_begin_tag">
+<tt class="descname">_get_begin_tag</tt><big>(</big><em>tag: str</em>, <em>**attributes</em><big>)</big> &rarr; str<a class="reference internal" href="_modules/htmlwriter.html#XMLWriter._get_begin_tag"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#htmlwriter.XMLWriter._get_begin_tag" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a string of begin tag.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>tag</strong> (<em>str</em>) &#8211; tag name</li>
+<li><strong>attributes</strong> &#8211; tag attributes</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">&#8216;&lt;tag ...&gt;&#8217; or &#8216;&lt;tag&gt;&#8217; if attributes are empty</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">str</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="htmlwriter.XMLWriter._merge_attribute_handlers">
+<tt class="descname">_merge_attribute_handlers</tt><em class="property"> = {}</em><a class="headerlink" href="#htmlwriter.XMLWriter._merge_attribute_handlers" title="Permalink to this definition">¶</a></dt>
+<dd><p>See source of <a class="reference internal" href="#htmlwriter.XMLWriter._merge_attributes" title="htmlwriter.XMLWriter._merge_attributes"><tt class="xref py py-meth docutils literal"><span class="pre">_merge_attributes()</span></tt></a> for implementation.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="htmlwriter.XMLWriter._merge_attributes">
+<tt class="descname">_merge_attributes</tt><big>(</big><em>tag: str</em>, <em>*args</em><big>)</big> &rarr; dict<a class="reference internal" href="_modules/htmlwriter.html#XMLWriter._merge_attributes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#htmlwriter.XMLWriter._merge_attributes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Merge and rename attributes.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>tag</strong> (<em>str</em>) &#8211; tag name string</li>
+<li><strong>args</strong> (<em>tuple(dict)</em>) &#8211; tuple of attributes, later is prior</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">new merged attributes <cite>dict</cite></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">dict</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="htmlwriter.XMLWriter._no_end_tags">
+<tt class="descname">_no_end_tags</tt><em class="property"> = set()</em><a class="headerlink" href="#htmlwriter.XMLWriter._no_end_tags" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set of tag name that does not require end tag.
+See source of <a class="reference internal" href="#htmlwriter.XMLWriter._tag" title="htmlwriter.XMLWriter._tag"><tt class="xref py py-meth docutils literal"><span class="pre">_tag()</span></tt></a> for implementation.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="htmlwriter.XMLWriter._pending">
+<tt class="descname">_pending</tt><em class="property"> = None</em><a class="headerlink" href="#htmlwriter.XMLWriter._pending" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pending writing state as <cite>context manager</cite>. This must be not executed, execute in next
+<a class="reference internal" href="htmlwriter.html#htmlwriter.XMLWriter.write" title="htmlwriter.XMLWriter.write"><tt class="xref py py-meth docutils literal"><span class="pre">write()</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="htmlwriter.XMLWriter._require_end_tags">
+<tt class="descname">_require_end_tags</tt><em class="property"> = set()</em><a class="headerlink" href="#htmlwriter.XMLWriter._require_end_tags" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set of tag name that must have end tag.
+See source of <a class="reference internal" href="#htmlwriter.XMLWriter._tag" title="htmlwriter.XMLWriter._tag"><tt class="xref py py-meth docutils literal"><span class="pre">_tag()</span></tt></a> for implementation.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="htmlwriter.XMLWriter._signature">
+<tt class="descname">_signature</tt><em class="property"> = '[doctype: str, ]root_tag: str, **root_attributes'</em><a class="headerlink" href="#htmlwriter.XMLWriter._signature" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="htmlwriter.XMLWriter._stringify_attribute">
+<tt class="descname">_stringify_attribute</tt><big>(</big><em>tag: str</em>, <em>name: str</em>, <em>value</em><big>)</big> &rarr; str<a class="reference internal" href="_modules/htmlwriter.html#XMLWriter._stringify_attribute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#htmlwriter.XMLWriter._stringify_attribute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a string of attribute.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>tag</strong> (<em>str</em>) &#8211; tag name</li>
+<li><strong>name</strong> (<em>str</em>) &#8211; attribute name</li>
+<li><strong>value</strong> &#8211; attribute value</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">representation string for embedding begin tag</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">str</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="htmlwriter.XMLWriter._tag">
+<tt class="descname">_tag</tt><big>(</big><em>*args</em>, <em>**attributes</em><big>)</big><a class="reference internal" href="_modules/htmlwriter.html#XMLWriter._tag"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#htmlwriter.XMLWriter._tag" title="Permalink to this definition">¶</a></dt>
+<dd><p>Non wrapped version of <a class="reference internal" href="htmlwriter.html#htmlwriter.XMLWriter.tag" title="htmlwriter.XMLWriter.tag"><tt class="xref py py-meth docutils literal"><span class="pre">tag()</span></tt></a>. Don&#8217;t call this function directly. This function
+doesn&#8217;t register and cleanup <a class="reference internal" href="#htmlwriter.XMLWriter._pending" title="htmlwriter.XMLWriter._pending"><tt class="xref py py-attr docutils literal"><span class="pre">_pending</span></tt></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>tag</strong> (<em>str</em>) &#8211; tag name</li>
+<li><strong>text</strong> (<em>str</em>) &#8211; text content, this will be written by <a class="reference internal" href="htmlwriter.html#htmlwriter.XMLWriter.text" title="htmlwriter.XMLWriter.text"><tt class="xref py py-meth docutils literal"><span class="pre">text()</span></tt></a></li>
+<li><strong>attributes</strong> &#8211; attributes</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#context-manager-types">context manager</a></p>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="htmlwriter.XMLWriter._template">
+<tt class="descname">_template</tt><em class="property"> = '&lt;template&gt;&lt;/template&gt;'</em><a class="headerlink" href="#htmlwriter.XMLWriter._template" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate method from string quickly.
+See source of <a class="reference internal" href="#htmlwriter.PreProcessor" title="htmlwriter.PreProcessor"><tt class="xref py py-class docutils literal"><span class="pre">PreProcessor</span></tt></a> for implementation.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="htmlwriter.TagMethodHelper">
+<em class="property">class </em><tt class="descclassname">htmlwriter.</tt><tt class="descname">TagMethodHelper</tt><big>(</big><em>method</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="_modules/htmlwriter.html#TagMethodHelper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#htmlwriter.TagMethodHelper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method wrapper for some features:</p>
+<ul class="simple">
+<li>Register and cleanup <a class="reference internal" href="#htmlwriter.XMLWriter._pending" title="htmlwriter.XMLWriter._pending"><tt class="xref py py-attr docutils literal"><span class="pre">_pending</span></tt></a>.</li>
+<li><cite>Conetxt manager</cite> without function calling.</li>
+</ul>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>method</strong> (<em>function</em>) &#8211; original function</li>
+<li><strong>args</strong> &#8211; bound positional arguments</li>
+<li><strong>kwargs</strong> &#8211; bound keyword arguments</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="htmlwriter.PreProcessor">
+<em class="property">class </em><tt class="descclassname">htmlwriter.</tt><tt class="descname">PreProcessor</tt><a class="reference internal" href="_modules/htmlwriter.html#PreProcessor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#htmlwriter.PreProcessor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Metaclass for process <a class="reference internal" href="#htmlwriter.XMLWriter._template" title="htmlwriter.XMLWriter._template"><tt class="xref py py-attr docutils literal"><span class="pre">_template</span></tt></a>.</p>
+<p>This is a metaclass of <a class="reference internal" href="htmlwriter.html#htmlwriter.XMLWriter" title="htmlwriter.XMLWriter"><tt class="xref py py-class docutils literal"><span class="pre">XMLWriter</span></tt></a>.</p>
+<dl class="classmethod">
+<dt id="htmlwriter.PreProcessor.compile_template">
+<em class="property">classmethod </em><tt class="descname">compile_template</tt><big>(</big><em>writer_class</em><big>)</big><a class="reference internal" href="_modules/htmlwriter.html#PreProcessor.compile_template"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#htmlwriter.PreProcessor.compile_template" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate methods from string.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>writer_class</strong> (<em>XMLWriter</em>) &#8211; target class</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="htmlwriter.PreProcessor.get_name">
+<em class="property">classmethod </em><tt class="descname">get_name</tt><big>(</big><em>prefix: str</em>, <em>e: xml.etree.ElementTree.Element</em><big>)</big> &rarr; str<a class="reference internal" href="_modules/htmlwriter.html#PreProcessor.get_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#htmlwriter.PreProcessor.get_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate method name from element.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>prefix</strong> (<em>str</em>) &#8211; method name prefix</li>
+<li><strong>e</strong> (<em>Element</em>) &#8211; source element</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">method name</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">str</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="htmlwriter.PreProcessor.handle_attribute_map_class">
+<em class="property">classmethod </em><tt class="descname">handle_attribute_map_class</tt><big>(</big><em>patterns: str</em>, <em>input_attributes: dict</em><big>)</big> &rarr; dict<a class="reference internal" href="_modules/htmlwriter.html#PreProcessor.handle_attribute_map_class"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#htmlwriter.PreProcessor.handle_attribute_map_class" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handle <cite>template-attribute-map-class</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>patterns</strong> (<em>str</em>) &#8211; handling attribute value (ex. &#8216;active, disabled as btn-disabled&#8217;)</li>
+<li><strong>input_attributes</strong> (<em>dict</em>) &#8211; source attributes</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">filtered attributes</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">dict</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="htmlwriter.PreProcessor.handle_attributes">
+<em class="property">classmethod </em><tt class="descname">handle_attributes</tt><big>(</big><em>patterns: str</em>, <em>input_attributes: dict</em><big>)</big> &rarr; dict<a class="reference internal" href="_modules/htmlwriter.html#PreProcessor.handle_attributes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#htmlwriter.PreProcessor.handle_attributes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handle <cite>template-attributes</cite>.</p>
+<p>Pattern is glob style and <cite>-</cite> prefix means exclude pattern.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>patterns</strong> (<em>str</em>) &#8211; handling attribute value</li>
+<li><strong>input_attributes</strong> (<em>dict</em>) &#8211; source attributes</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">filtered attributes</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">dict</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="htmlwriter.PreProcessor.make_from_deep">
+<em class="property">classmethod </em><tt class="descname">make_from_deep</tt><big>(</big><em>root: xml.etree.ElementTree.Element</em><big>)</big><a class="reference internal" href="_modules/htmlwriter.html#PreProcessor.make_from_deep"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#htmlwriter.PreProcessor.make_from_deep" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate method from element.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>e</strong> (<em>Element</em>) &#8211; source element</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">not bound method</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">function</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="htmlwriter.PreProcessor.make_from_shallow">
+<em class="property">classmethod </em><tt class="descname">make_from_shallow</tt><big>(</big><em>e: xml.etree.ElementTree.Element</em><big>)</big><a class="reference internal" href="_modules/htmlwriter.html#PreProcessor.make_from_shallow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#htmlwriter.PreProcessor.make_from_shallow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate method from element.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>e</strong> (<em>Element</em>) &#8211; source element</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">not bound method</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">function</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="htmlwriter.html" class="btn btn-neutral" title="module ‘htmlwriter’"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2014, chrono-meter@gmx.net.
+    </p>
+  </div>
+
+  <a href="https://github.com/snide/sphinx_rtd_theme">Sphinx theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

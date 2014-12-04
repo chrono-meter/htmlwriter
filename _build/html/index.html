@@ -1,0 +1,296 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Introduction &mdash; htmlwriter 1.0.0 documentation</title>
+  
+
+  
+  
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="top" title="htmlwriter 1.0.0 documentation" href="#"/>
+        <link rel="next" title="module ‘htmlwriter’" href="htmlwriter.html"/> 
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.6.2/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        <a href="#" class="fa fa-home"> htmlwriter</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+        
+            <ul>
+<li class="toctree-l1"><a class="reference internal" href="htmlwriter.html">module &#8216;htmlwriter&#8217;</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="htmlwriter.html#htmlwriter-html-with-python-codes">htmlwriter - HTML with Python codes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="htmlwriter.html#xmlwriter">XMLWriter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="htmlwriter.html#htmlwriter">HTMLWriter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="htmlwriter.html#xhtmlwriter">XHTMLWriter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="htmlwriter.html#html5writer">HTML5Writer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="htmlwriter.html#bootstrap3writer">Bootstrap3Writer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="htmlwriter.html#constants">Constants</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="extend.html">Custom writer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="extend.html#template">Template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extend.html#tagmethodhelper">TagMethodHelper</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extend.html#renaming-and-merging-attribute">Renaming and merging attribute</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extend.html#internal">Internal</a></li>
+</ul>
+</li>
+</ul>
+
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="#">htmlwriter</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="#">Docs</a> &raquo;</li>
+      
+    <li>Introduction</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          <a href="_sources/index.txt" rel="nofollow"> View page source</a>
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            
+  <div class="section" id="introduction">
+<h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
+<p>Let&#8217;s write HTML with Python codes:</p>
+<div class="highlight-pycon"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">htmlwriter</span> <span class="kn">import</span> <span class="n">HTML5Writer</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">h</span> <span class="o">=</span> <span class="n">HTML5Writer</span><span class="p">(</span><span class="n">lang</span><span class="o">=</span><span class="s">&#39;en&#39;</span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">h</span><span class="o">.</span><span class="n">body</span><span class="p">,</span> <span class="n">h</span><span class="o">.</span><span class="n">main</span><span class="p">(</span><span class="n">class_</span><span class="o">=</span><span class="s">&#39;main&#39;</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">h</span><span class="o">.</span><span class="n">p</span><span class="p">(</span><span class="s">&#39;hello, world&#39;</span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">h</span><span class="o">.</span><span class="n">getvalue</span><span class="p">()</span>
+<span class="go">&#39;&lt;html lang=&quot;en&quot;&gt;&lt;body&gt;&lt;main class=&quot;main&quot;&gt;&lt;p&gt;hello, world&lt;/p&gt;&lt;/main&gt;&lt;/body&gt;&lt;/html&gt;&#39;</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<ul class="last simple">
+<li><cite>class</cite> attribute must be &#8216;<a href="#id1"><span class="problematic" id="id2">class_</span></a>&#8216; in Python code. Also <cite>data-*</cite> must be &#8216;data_*&#8217; and <cite>aria-*</cite> must be &#8216;aria_*&#8217; too.</li>
+<li>Function calling brackets <cite>()</cite> is not required at <cite>with statement</cite> if no arguments.</li>
+</ul>
+</div>
+<div class="section" id="complex-html-bootstrap">
+<h2>Complex HTML (Bootstrap)<a class="headerlink" href="#complex-html-bootstrap" title="Permalink to this headline">¶</a></h2>
+<p>Write complex Bootstrap with <a class="reference internal" href="htmlwriter.html#htmlwriter.Bootstrap3Writer" title="htmlwriter.Bootstrap3Writer"><tt class="xref py py-class docutils literal"><span class="pre">Bootstrap3Writer</span></tt></a>.</p>
+<div class="highlight-pycon"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">htmlwriter</span> <span class="kn">import</span> <span class="n">Bootstrap3Writer</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">h</span> <span class="o">=</span> <span class="n">Bootstrap3Writer</span><span class="p">(</span><span class="n">lang</span><span class="o">=</span><span class="s">&#39;en&#39;</span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">h</span><span class="o">.</span><span class="n">body</span><span class="p">,</span> <span class="n">h</span><span class="o">.</span><span class="n">bs_modal_dialog</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s">&quot;myModal&quot;</span><span class="p">,</span> <span class="n">class_</span><span class="o">=</span><span class="s">&quot;fade&quot;</span><span class="p">,</span> <span class="n">aria_labelledby</span><span class="o">=</span><span class="s">&quot;myModalLabel&quot;</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">with</span> <span class="n">h</span><span class="o">.</span><span class="n">bs_modal_header</span><span class="p">:</span>
+<span class="gp">... </span>        <span class="n">h</span><span class="o">.</span><span class="n">bs_modal_close_icon</span><span class="p">(</span><span class="s">&#39;Close&#39;</span><span class="p">)</span>
+<span class="gp">... </span>        <span class="n">h</span><span class="o">.</span><span class="n">h4</span><span class="p">(</span><span class="s">&#39;Modal title&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="o">=</span><span class="s">&quot;modal-title&quot;</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s">&quot;myModalLabel&quot;</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="gp">... </span>    <span class="k">with</span> <span class="n">h</span><span class="o">.</span><span class="n">bs_modal_body</span><span class="p">:</span>
+<span class="gp">... </span>        <span class="n">h</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="s">&#39;...&#39;</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="gp">... </span>    <span class="k">with</span> <span class="n">h</span><span class="o">.</span><span class="n">bs_modal_footer</span><span class="p">:</span>
+<span class="gp">... </span>        <span class="n">h</span><span class="o">.</span><span class="n">bs_modal_close_button</span><span class="p">(</span><span class="s">&#39;Close&#39;</span><span class="p">)</span>
+<span class="gp">... </span>        <span class="n">h</span><span class="o">.</span><span class="n">bs_btn_primary</span><span class="p">(</span><span class="s">&#39;Save changes&#39;</span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">h</span><span class="o">.</span><span class="n">getvalue</span><span class="p">()</span>
+<span class="go">&#39;&#39;&#39;&lt;!DOCTYPE html&gt;</span>
+<span class="go">&lt;html lang=&quot;en&quot;&gt;</span>
+<span class="go">    &lt;body&gt;</span>
+<span class="go">        &lt;div role=&quot;dialog&quot; aria-hidden=&quot;true&quot; class=&quot;fade modal&quot; aria-labelledby=&quot;myModalLabel&quot; id=&quot;myModal&quot;</span>
+<span class="go">             tabindex=&quot;-1&quot;&gt;</span>
+<span class="go">            &lt;div class=&quot;modal-dialog&quot;&gt;</span>
+<span class="go">                &lt;div class=&quot;modal-content&quot;&gt;</span>
+<span class="go">                    &lt;div class=&quot;modal-header&quot;&gt;</span>
+<span class="go">                        &lt;button data-dismiss=&quot;modal&quot; class=&quot;close&quot; type=&quot;button&quot;&gt;</span>
+<span class="go">                            &lt;span aria-hidden=&quot;true&quot;&gt;&amp;times;&lt;/span&gt;</span>
+<span class="go">                            &lt;span class=&quot;sr-only&quot;&gt;Close&lt;/span&gt;</span>
+<span class="go">                        &lt;/button&gt;</span>
+<span class="go">                        &lt;h4 class=&quot;modal-title&quot; id=&quot;myModalLabel&quot;&gt;Modal title&lt;/h4&gt;</span>
+<span class="go">                    &lt;/div&gt;</span>
+<span class="go">                    &lt;div class=&quot;modal-body&quot;&gt;...&lt;/div&gt;</span>
+<span class="go">                    &lt;div class=&quot;modal-footer&quot;&gt;</span>
+<span class="go">                        &lt;button data-dismiss=&quot;modal&quot; class=&quot;btn btn-default&quot; type=&quot;button&quot;&gt;Close&lt;/button&gt;</span>
+<span class="go">                        &lt;button class=&quot;btn btn-primary&quot; type=&quot;button&quot;&gt;Save changes&lt;/button&gt;</span>
+<span class="go">                    &lt;/div&gt;</span>
+<span class="go">                &lt;/div&gt;</span>
+<span class="go">            &lt;/div&gt;</span>
+<span class="go">        &lt;/div&gt;</span>
+<span class="go">    &lt;/body&gt;</span>
+<span class="go">&lt;/html&gt;</span>
+<span class="go">&#39;&#39;&#39;</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The result is not prettified actually. This is prettified for example output.</p>
+</div>
+</div>
+<div class="section" id="get-partial-result">
+<h2>Get partial result<a class="headerlink" href="#get-partial-result" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-pycon"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">htmlwriter</span> <span class="kn">import</span> <span class="n">HTML5Writer</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">h</span> <span class="o">=</span> <span class="n">HTML5Writer</span><span class="p">()</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">h</span><span class="o">.</span><span class="n">main</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">h</span><span class="o">.</span><span class="n">p</span><span class="p">(</span><span class="s">&#39;hello, world&#39;</span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">h</span><span class="o">.</span><span class="n">getvalue</span><span class="p">(</span><span class="n">root_tag</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<span class="go">&#39;&lt;main&gt;&lt;p&gt;hello, world&lt;/p&gt;&lt;/main&gt;&#39;</span>
+</pre></div>
+</div>
+<p>See <a class="reference internal" href="htmlwriter.html#htmlwriter.XMLWriter.getvalue" title="htmlwriter.XMLWriter.getvalue"><tt class="xref py py-meth docutils literal"><span class="pre">getvalue()</span></tt></a> for more information.</p>
+</div>
+</div>
+<div class="section" id="contents">
+<h1>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="htmlwriter.html">module &#8216;htmlwriter&#8217;</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="htmlwriter.html#htmlwriter-html-with-python-codes">htmlwriter - HTML with Python codes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="htmlwriter.html#xmlwriter">XMLWriter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="htmlwriter.html#htmlwriter">HTMLWriter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="htmlwriter.html#xhtmlwriter">XHTMLWriter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="htmlwriter.html#html5writer">HTML5Writer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="htmlwriter.html#bootstrap3writer">Bootstrap3Writer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="htmlwriter.html#constants">Constants</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="extend.html">Custom writer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="extend.html#template">Template</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extend.html#tagmethodhelper">TagMethodHelper</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extend.html#renaming-and-merging-attribute">Renaming and merging attribute</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extend.html#internal">Internal</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><em>Index</em></a></li>
+<li><a class="reference internal" href="py-modindex.html"><em>Module Index</em></a></li>
+<li><a class="reference internal" href="search.html"><em>Search Page</em></a></li>
+</ul>
+</div>
+
+
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="htmlwriter.html" class="btn btn-neutral float-right" title="module ‘htmlwriter’"/>Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2014, chrono-meter@gmx.net.
+    </p>
+  </div>
+
+  <a href="https://github.com/snide/sphinx_rtd_theme">Sphinx theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
