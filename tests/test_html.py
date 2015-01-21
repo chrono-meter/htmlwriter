@@ -1,4 +1,4 @@
-#!/usr/local/bin/python3.4
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 from htmlwriter import XmlTestCase, HTML5Writer, Bootstrap3Writer
 

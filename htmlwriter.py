@@ -1,4 +1,4 @@
-#!/usr/local/bin/python3.4
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """\
 htmlwriter - HTML with Python codes
@@ -97,12 +97,6 @@ class TagMethodHelper:
         self.context_manager = None
         functools.update_wrapper(self, method)
 
-    @classmethod
-    def decorator(cls, *args, **kwargs):
-        def helper(method):
-            return cls(method, *args, **kwargs)
-        return helper
-
     def __get__(self, obj, type=None):
         result = self.__class__(self.method.__get__(obj, type), *self.args, **self.kwargs)
         result.__name__ = self.__name__
@@ -116,22 +110,22 @@ class TagMethodHelper:
         return repr(self.method)
 
     def __call__(self, *args, **kwargs):
-        method = self.method  # get bound method
+        method = self.method
         args = self.args + args
         kwargs = dict(self.kwargs, **kwargs)
-        self = method.__self__
+        writer = method.__self__
 
         @contextlib.contextmanager
         def helper():
-            assert self._pending is pending, '%s' % (self._pending, )
-            self._pending = None
-            with method(*args, **kwargs) as result:
-                yield result
+            assert writer._pending is pending, '%s' % (writer._pending, )
+            writer._pending = None
+            with method(*args, **kwargs):
+                yield
 
-        self.write('')  # consume self._pending
-        assert self._pending is None, '%s' % (self._pending, )
+        writer.write('')  # consume writer._pending
+        assert writer._pending is None, '%s' % (writer._pending, )
 
-        self._pending = pending = helper()
+        writer._pending = pending = helper()
         return pending
 
     def __enter__(self):
@@ -151,6 +145,7 @@ class PreProcessor(type):
 
     This is a metaclass of :class:`~htmlwriter.XMLWriter`.
     """
+
     def __new__(cls, name, bases, classdict):
         klass = type.__new__(cls, name, bases, dict(classdict))
         cls.compile_template(klass)
@@ -162,6 +157,9 @@ class PreProcessor(type):
 
         :param XMLWriter writer_class: target class
         """
+        if not writer_class._template:
+            return
+
         doc = parse_xml(writer_class._template)
 
         for e in doc:
@@ -237,7 +235,7 @@ class PreProcessor(type):
     def make_from_deep(cls, root: etree.Element):
         """Generate method from element.
 
-        :param Element e: source element
+        :param Element root: source element
         :return: not bound method
         :rtype: function
         """
@@ -565,9 +563,11 @@ class XMLWriter(StringIO, metaclass=PreProcessor):
                 value = str(value)
 
             elif isinstance(value, collections.Mapping):
-                raise NotImplementedError('')  # TODO: dict attribute
+                # TODO: dict attribute
+                # http://api.jquery.com/data/
+                raise NotImplementedError('value as dict is not supported')
 
-            elif isinstance(value, collections.Iterable):
+            elif isinstance(value, collections.Iterable):  # for `class`
                 value = ' '.join(value)
 
             else:
@@ -577,6 +577,7 @@ class XMLWriter(StringIO, metaclass=PreProcessor):
 
         return ''
 
+    @contextlib.contextmanager
     def _tag(self, *args, **attributes):
         """Non wrapped version of :meth:`~htmlwriter.XMLWriter.tag`. Don't call this function directly. This function
         doesn't register and cleanup :attr:`~htmlwriter.XMLWriter._pending`.
@@ -595,29 +596,25 @@ class XMLWriter(StringIO, metaclass=PreProcessor):
             tag, content = args
         assert isinstance(tag, str) and tag, 'not expected: %s' % (tag, )
 
-        @contextlib.contextmanager
-        def helper():
-            self.write(self._get_begin_tag(tag, **attributes))
-            if content:
-                self.text(content)  # NOTE: Use .write() for content without escaping
+        self.write(self._get_begin_tag(tag, **attributes))
+        if content:
+            self.text(content)
 
-            wrote = self.tell()
+        wrote = self.tell()
 
-            yield
+        yield
 
-            if not content and wrote == self.tell() and self._pending is None:
-                if tag in self._require_end_tags:
-                    self.write('</%s>' % (tag, ))
-                elif tag in self._no_end_tags:
-                    pass
-                else:
-                    self.seek(self.tell() - 1)
-                    self.write('/>')
-            else:
-                assert tag not in self._no_end_tags, '"%s" tag cannot contain content' % (tag, )
+        if not content and wrote == self.tell() and self._pending is None:
+            if tag in self._no_end_tags:
+                pass
+            elif self._require_end_tags is True or tag in self._require_end_tags:
                 self.write('</%s>' % (tag, ))
-
-        return helper()
+            else:
+                self.seek(self.tell() - 1)
+                self.write('/>')
+        else:
+            assert tag not in self._no_end_tags, '"%s" tag cannot contain content' % (tag, )
+            self.write('</%s>' % (tag, ))
 
     tag = TagMethodHelper(_tag)
     tag.__doc__ = """Write or enter a tag.
@@ -631,22 +628,46 @@ class XMLWriter(StringIO, metaclass=PreProcessor):
     def text(self, s: str):
         """Write text with escaping '<' and '>'.
         """
-        # self.write(xml.sax.saxutils.escape(s))
-        self.write(s.replace(">", "&gt;").replace("<", "&lt;"))
+        if hasattr(s, '__html__'):
+            return self.write(s.__html__())
+
+        if not isinstance(s, str):
+            s = str(s)
+
+        mapping = {
+            # ' ': '&nbsp;',
+            '&': '&amp;',
+            '>': '&gt;',
+            '<': '&lt;',
+        }
+        # s = re.sub('&(?!#[0-9]{1,4};|[A-Za-z]+;)|<|>| ', lambda m: mapping[m.group(0)], s)
+        s = re.sub('&(?!#[0-9]{1,4};|[A-Za-z]+;)|<|>', lambda m: mapping[m.group(0)], s)
+        return self.write(s)
 
     def comment(self, s: str):
         """Write comment.
         """
-        assert '-->' not in s
-        self.write('<!--%s-->' % (s, ))
+        # assert '-->' not in s
+        self.write('<!--%s-->' % (etree._escape_cdata(s), ))
 
     def cdata(self, s: str):
         """Write cdata.
         """
-        assert ']]>' not in s
-        # TODO: see xml.etree.ElementTree._escape_cdata
-        #       .replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-        self.write('<![CDATA[%s]]>' % (s, ))
+        # assert ']]>' not in s
+        self.write('<![CDATA[%s]]>' % (etree._escape_cdata(s), ))
+
+    def processing_instruction(self, target: str, *contents: str, **attributes):
+        """Write Processing Instruction.
+        """
+        self.write('<?%s' % (target, ))
+
+        for content in contents:
+            self.write(' %s' % (content, ))
+
+        for attribute in attributes:
+            self.write(' %s' % (self._stringify_attribute('?%s' % (target, ), *attribute), ))
+
+        self.write('?>')
 
 
 # TODO: html pretty printing (like: etree._serialize['html'] = etree._serialize_html, etree.tostring(*, method='html'))
@@ -1001,8 +1022,9 @@ class HTML5Writer(HTMLWriter):
         <video/>
         <wbr/>
     </template>'''
+    _require_end_tags = True
     _attribute_rename_patterns = HTMLWriter._attribute_rename_patterns + (
-        ('^(data|aria)_(.+)', '\\1-\\2'),
+        ('^(data|aria)_(.+)', lambda m: m.group(0).replace('_', '-')),
     )
 
     def __init__(self, **root_attributes):
@@ -1181,9 +1203,29 @@ class Bootstrap3Writer(HTML5Writer):
             <ul id="nav-pills-justified" class="nav nav-pills nav-justified"/>
             <li id="nav-dropdown" role="presentation" class="dropdown"/>
         Navbar:
-            <nav id="navbar-default" class="navbar navbar-default" role="navigation"/>
-            <div class="navbar-header"/>
-            ...
+            <nav id="navbar" class="navbar navbar-default" role="navigation" template-attributes="*">
+                <div class="container-fluid">
+                    <div class="navbar-header">
+                        <button type="button" class="navbar-toggle" data-toggle="collapse" template-attributes="id">
+                            <span class="sr-only">Toggle navigation</span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </button>
+                        <a class="navbar-brand" href="#" template-attributes="href">
+                            <template-content/>
+                        </a>
+                    </div><!-- /.navbar-header -->
+                    <div class="collapse navbar-collapse" template-attributes="*, -href">
+                        <template-yield/>
+                    </div><!-- /.navbar-collapse -->
+                </div><!-- /.container-fluid -->
+            </nav>
+            <p class="navbar-text"/>
+            <p id="navbar-text-right" class="navbar-text navbar-right"/>
+            <a href="#" class="navbar-link"/>
+        Breadcrumbs:
+            <ol class="breadcrumb"/>
         Pager:
             <ul class="pager"/>
             <li class="previous" template-attribute-map-class="disabled">
